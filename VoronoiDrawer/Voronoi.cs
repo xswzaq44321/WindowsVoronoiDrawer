@@ -8,6 +8,9 @@ namespace VoronoiStruct
 {
 	class Voronoi
 	{
+		public Voronoi()
+		{
+		}
 		public Voronoi(int width, int height)
 		{
 			this.width = width;
