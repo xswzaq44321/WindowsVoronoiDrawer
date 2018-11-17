@@ -77,13 +77,16 @@ namespace VoronoiDrawer
 			g = Graphics.FromImage(bmp);
 			g.Clear(Color.White);
 			pictureBox.Image = bmp;
-			foreach (var item in map.points)
+			foreach (var item in map.polygons)
 			{
-				drawPoint(blueBrush, item);
+				drawPoint(blueBrush, item.focus);
 			}
-			foreach (var item in map.lines)
+			foreach (var item in map.polygons)
 			{
-				drawLine(blackPen, item.a, item.b); ;
+				foreach (var item2 in item.edges)
+				{
+					drawLine(blackPen, item2.line);
+				}
 			}
 			pictureBox.Invalidate();
 		}
@@ -103,10 +106,10 @@ namespace VoronoiDrawer
 			pictureBox.Image = bar;
 			g = Graphics.FromImage(bar);
 			drawLine(redPen, sweepLine);
-			List<Parabola> parabolas = new List<Parabola>();
-			for (int i = 0; i < vmap.points.Count; i++)
+			List<VoronoiStruct.Parabola> parabolas = new List<VoronoiStruct.Parabola>();
+			for (int i = 0; i < vmap.polygons.Count; i++)
 			{
-				parabolas.Add(getParabola(vmap.points[i], i));
+				parabolas.Add(getParabola(vmap.polygons[i].focus, i));
 			}
 			if (checkBox_visualize_voronoi.Checked)
 			{
@@ -136,9 +139,9 @@ namespace VoronoiDrawer
 			timer1.Start();
 		}
 
-		Parabola getParabola(VoronoiStruct.Point focus, int id)
+		VoronoiStruct.Parabola getParabola(VoronoiStruct.Point focus, int id)
 		{
-			return new Parabola(focus, sweepLine.a.x, new Rectangle(0, 0, vmap.width, vmap.height), id);
+			return new VoronoiStruct.Parabola(focus, sweepLine.a.x, new Rectangle(0, 0, vmap.width, vmap.height), id);
 		}
 
 		private void openToolStripMenuItem_Click(object sender, EventArgs e)
