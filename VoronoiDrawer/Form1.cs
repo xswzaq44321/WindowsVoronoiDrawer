@@ -102,6 +102,7 @@ namespace VoronoiDrawer
 			}
 			++sweepLine.a.x;
 			++sweepLine.b.x;
+			drawVoronoi(vmap);
 			Bitmap bar = new Bitmap(bmp);
 			pictureBox.Image = bar;
 			g = Graphics.FromImage(bar);
@@ -111,21 +112,80 @@ namespace VoronoiDrawer
 			{
 				parabolas.Add(getParabola(vmap.polygons[i].focus, i));
 			}
-			if (checkBox_visualize_voronoi.Checked)
+			foreach (var item in parabolas)
 			{
-				foreach (var item in parabolas)
+				foreach (var item2 in parabolas)
 				{
-					foreach (var item2 in parabolas)
+					item.dealIntersect(item2);
+				}
+				var intersections = item.getIntersections();
+				foreach (var item2 in intersections)
+				{
+					for (int i = 0; i < 2; i++)
 					{
-						item.dealIntersect(item2);
+						VoronoiStruct.Edge edge = null;
+						foreach (var item3 in vmap.polygons[item2.parentID[i]].edges)
+						{
+							if (item3.parentID.Contains(item2.parentID[0]) &&
+								item3.parentID.Contains(item2.parentID[1]))
+							{
+								edge = item3;
+							}
+						}
+						if (edge == null)
+						{
+							edge = new VoronoiStruct.Edge(item2.parentID[0], item2.parentID[1]);
+							if (item2.points.Length == 1)
+							{
+								edge.line.a = new VoronoiStruct.Point((int)item2.points[0].X, (int)item2.points[0].Y);
+								edge.line.b = new VoronoiStruct.Point((int)item2.points[0].X, (int)item2.points[0].Y);
+							}
+							else
+							{
+								edge.line.a = new VoronoiStruct.Point((int)item2.points[0].X, (int)item2.points[0].Y);
+								edge.line.b = new VoronoiStruct.Point((int)item2.points[1].X, (int)item2.points[1].Y);
+							}
+							vmap.polygons[item2.parentID[i]].edges.Add(edge);
+						}
+						else
+						{
+							if (item2.points.Length == 1)
+							{
+								if (distance(edge.line.a, item.points[0]) < distance(edge.line.b, item.points[0]))
+								{
+									edge.line.a = new VoronoiStruct.Point((int)item2.points[0].X, (int)item2.points[0].Y);
+								}
+								else
+								{
+									edge.line.b = new VoronoiStruct.Point((int)item2.points[0].X, (int)item2.points[0].Y);
+								}
+							}
+							else
+							{
+								edge.line.a = new VoronoiStruct.Point((int)item2.points[0].X, (int)item2.points[0].Y);
+								edge.line.b = new VoronoiStruct.Point((int)item2.points[1].X, (int)item2.points[1].Y);
+							}
+						} 
 					}
-					if (item.points.Count > 1)
+				}
+				if (item.points.Count > 1 && checkBox_visualize_voronoi.Checked)
+				{
+					g.DrawCurve(greenPen, item.points.ToArray());
+					foreach (var item3 in intersections)
 					{
-						g.DrawCurve(greenPen, item.points.ToArray());
+						foreach (var item4 in item3.points)
+						{
+							drawPoint(orangeBrush, Point.Round(item4));
+						}
 					}
 				}
 			}
 			pictureBox.Invalidate();
+		}
+
+		double distance(VoronoiStruct.Point a, PointF b)
+		{
+			return Math.Sqrt(Math.Pow(a.x - b.X, 2) + Math.Pow(a.y - b.Y, 2));
 		}
 
 		void performFortune()

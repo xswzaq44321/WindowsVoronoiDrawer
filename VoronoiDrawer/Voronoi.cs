@@ -48,10 +48,19 @@ namespace VoronoiStruct
 	{
 		public Edge()
 		{
-			parents = new Parabola[2];
+			parentID = new int[2];
+			parentID[0] = -1;
+			parentID[1] = -1;
 			line = new Line();
 		}
-		public Parabola[] parents;
+		public Edge(int id1, int id2)
+		{
+			parentID = new int[2];
+			parentID[0] = id1;
+			parentID[1] = id2;
+			line = new Line();
+		}
+		public int[] parentID;
 		public Line line;
 	}
 
@@ -59,12 +68,14 @@ namespace VoronoiStruct
 	{
 		public Parabola(VoronoiStruct.Point focus, int n, Rectangle regin, int id)
 		{
+			this.id = id;
 			points = new List<PointF>();
 			this.k = focus.y;
 			this.h = (n + focus.x) / 2.0;
 			this.c = -(n - focus.x) / 2.0;
 			this.focus = focus;
-			this.id = id;
+			this.intersections = new List<Intersection>();
+			this.regin = regin;
 			if (this.c > 0)
 			{
 				this.points.Add(new PointF(focus.x, focus.y));
@@ -86,10 +97,55 @@ namespace VoronoiStruct
 				}
 			}
 		}
+
 		public int id;
 		public List<PointF> points;
 		public VoronoiStruct.Point focus;
 		public double k, h, c;
+		private List<Intersection> intersections;
+		private Rectangle regin;
+
+		public List<Intersection> getIntersections()
+		{
+			for (int i = 0; i < intersections.Count; i++)
+			{
+				for (int j = 0; j < intersections[i].points.Length; j++)
+				{
+					if (!contain(intersections[i].points[j]) || 
+						!regin.Contains(System.Drawing.Point.Round(intersections[i].points[j])))
+					{
+						if (intersections[i].points.Length == 1)
+						{
+							intersections.RemoveAt(i);
+							--i;
+							break;
+						}
+						else
+						{
+							PointF[] temp = new PointF[1];
+							temp[0] = intersections[i].points[
+								(intersections[i].points.Length - 1 - j)];
+							intersections[i].points = temp;
+							--j;
+						}
+					}
+				}
+			}
+			return intersections;
+		}
+
+		private bool contain(PointF point)
+		{
+			float y1 = (float)Math.Floor(point.Y);
+			float y2 = (float)Math.Floor(point.Y) + 1;
+			float x1 = (float)(Math.Pow(y1 - this.k, 2) / (4 * this.c) + this.h);
+			float x2 = (float)(Math.Pow(y2 - this.k, 2) / (4 * this.c) + this.h);
+			if (points.Contains(new PointF(x1, y1)) || points.Contains(new PointF(x2, y2)))
+			{
+				return true;
+			}
+			return false;
+		}
 
 		public void dealIntersect(Parabola obj)
 		{
@@ -99,7 +155,7 @@ namespace VoronoiStruct
 				bool gotErased = false;
 				points.RemoveAll((PointF point) =>
 				{
-					if (this.focus.x < obj.focus.x && point.Y > intersections[0].Y && point.Y < intersections[1].Y)
+					if (this.focus.x <= obj.focus.x && point.Y > intersections[0].Y && point.Y < intersections[1].Y)
 					{
 						gotErased = true;
 						return true;
@@ -116,6 +172,12 @@ namespace VoronoiStruct
 						else
 							return false;
 					});
+					int[] ids = new int[2];
+					ids[0] = id;
+					ids[1] = obj.id;
+					Intersection temp = new Intersection(intersections[0], intersections[1]);
+					temp.parentID = ids;
+					this.intersections.Add(temp);
 				}
 			}
 		}
@@ -146,7 +208,7 @@ namespace VoronoiStruct
 				else if (distance == 0)
 				{
 					double y = (-B + Math.Sqrt(distance)) / (2 * A);
-					double x = Math.Pow(y - k, 2) / (4 * c) + k;
+					double x = Math.Pow(y - k, 2) / (4 * c) + h;
 					PointF[] s = new PointF[1];
 					s[0] = new PointF((float)x, (float)y);
 					return s;
@@ -155,8 +217,8 @@ namespace VoronoiStruct
 				{
 					double y1 = (-B + Math.Sqrt(distance)) / (2 * A);
 					double y2 = (-B - Math.Sqrt(distance)) / (2 * A);
-					double x1 = Math.Pow(y1 - k, 2) / (4 * c) + k;
-					double x2 = Math.Pow(y2 - k, 2) / (4 * c) + k;
+					double x1 = Math.Pow(y1 - k, 2) / (4 * c) + h;
+					double x2 = Math.Pow(y2 - k, 2) / (4 * c) + h;
 					PointF[] s = new PointF[2];
 					s[0] = new PointF((float)x1, (float)y1);
 					s[1] = new PointF((float)x2, (float)y2);
@@ -170,6 +232,32 @@ namespace VoronoiStruct
 				}
 			}
 		}
+	}
+
+	class Intersection
+	{
+		public Intersection()
+		{
+			parentID = new int[2];
+			parentID[0] = -1;
+			parentID[1] = -1;
+			points = null;
+		}
+		public Intersection(PointF a) :
+			this()
+		{
+			points = new PointF[1];
+			points[0] = a;
+		}
+		public Intersection(PointF a, PointF b) :
+			this()
+		{
+			points = new PointF[2];
+			points[0] = a;
+			points[1] = b;
+		}
+		public PointF[] points;
+		public int[] parentID;
 	}
 
 	struct Line

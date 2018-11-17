@@ -150,6 +150,8 @@
 			// checkBox_visualize_voronoi
 			// 
 			this.checkBox_visualize_voronoi.AutoSize = true;
+			this.checkBox_visualize_voronoi.Checked = true;
+			this.checkBox_visualize_voronoi.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.checkBox_visualize_voronoi.Location = new System.Drawing.Point(416, 198);
 			this.checkBox_visualize_voronoi.Name = "checkBox_visualize_voronoi";
 			this.checkBox_visualize_voronoi.Size = new System.Drawing.Size(64, 16);
