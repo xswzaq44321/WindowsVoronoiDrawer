@@ -100,13 +100,36 @@ namespace VoronoiDrawer
 				drawVoronoi(vmap);
 				return;
 			}
-			++sweepLine.a.x;
-			++sweepLine.b.x;
-			drawVoronoi(vmap);
+			if (checkBox_visualize_voronoi.Checked)
+				drawVoronoi(vmap);
 			Bitmap bar = new Bitmap(bmp);
 			pictureBox.Image = bar;
 			g = Graphics.FromImage(bar);
-			drawLine(redPen, sweepLine);
+			var parabolas = oneFortuneStep();
+			foreach (var item in parabolas)
+			{
+				var intersections = item.getIntersections();
+				if (item.points.Count > 1 && checkBox_visualize_voronoi.Checked)
+				{
+					g.DrawCurve(greenPen, item.points.ToArray());
+					foreach (var item3 in intersections)
+					{
+						foreach (var item4 in item3.points)
+						{
+							drawPoint(orangeBrush, Point.Round(item4));
+						}
+					}
+				}
+			}
+			if (checkBox_visualize_voronoi.Checked)
+				drawLine(redPen, sweepLine);
+			pictureBox.Invalidate();
+		}
+
+		List<VoronoiStruct.Parabola> oneFortuneStep()
+		{
+			++sweepLine.a.x;
+			++sweepLine.b.x;
 			List<VoronoiStruct.Parabola> parabolas = new List<VoronoiStruct.Parabola>();
 			for (int i = 0; i < vmap.polygons.Count; i++)
 			{
@@ -165,22 +188,11 @@ namespace VoronoiDrawer
 								edge.line.a = new VoronoiStruct.Point((int)item2.points[0].X, (int)item2.points[0].Y);
 								edge.line.b = new VoronoiStruct.Point((int)item2.points[1].X, (int)item2.points[1].Y);
 							}
-						} 
-					}
-				}
-				if (item.points.Count > 1 && checkBox_visualize_voronoi.Checked)
-				{
-					g.DrawCurve(greenPen, item.points.ToArray());
-					foreach (var item3 in intersections)
-					{
-						foreach (var item4 in item3.points)
-						{
-							drawPoint(orangeBrush, Point.Round(item4));
 						}
 					}
 				}
 			}
-			pictureBox.Invalidate();
+			return parabolas;
 		}
 
 		double distance(VoronoiStruct.Point a, PointF b)
@@ -215,7 +227,8 @@ namespace VoronoiDrawer
 
 		private void clearMapToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			g.Clear(Color.White);
+			if (g != null)
+				g.Clear(Color.White);
 			pictureBox.Invalidate();
 		}
 
@@ -283,6 +296,35 @@ namespace VoronoiDrawer
 		private void button_continue_voronoi_Click(object sender, EventArgs e)
 		{
 			timer1.Start();
+		}
+
+		private void button_run_Click(object sender, EventArgs e)
+		{
+			sweepLine.a = new VoronoiStruct.Point(0, 0);
+			sweepLine.b = new VoronoiStruct.Point(0, vmap.height);
+			progressBar_frotune.Maximum = vmap.width * 2;
+			progressBar_frotune.Value = 0;
+			while (sweepLine.a.x <= vmap.width * 2)
+			{
+				progressBar_frotune.Value = (int)sweepLine.a.x;
+				oneFortuneStep();
+			}
+			drawVoronoi(vmap);
+		}
+
+		private void 複製jsonToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			string json = JsonConvert.SerializeObject(vmap, Formatting.Indented);
+			Clipboard.SetText(json);
+		}
+
+		private void 儲存jsonToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			if(saveFileDialog2.ShowDialog() == DialogResult.OK)
+			{
+				string json = JsonConvert.SerializeObject(vmap, Formatting.Indented);
+				System.IO.File.WriteAllText(saveFileDialog2.FileName, json);
+			}
 		}
 
 		private void button_stop_perform_voronoi_Click(object sender, EventArgs e)

@@ -50,6 +50,13 @@
 			this.numericUpDown_line_size = new System.Windows.Forms.NumericUpDown();
 			this.button_pause_voronoi = new System.Windows.Forms.Button();
 			this.button_continue_voronoi = new System.Windows.Forms.Button();
+			this.label5 = new System.Windows.Forms.Label();
+			this.button_run = new System.Windows.Forms.Button();
+			this.progressBar_frotune = new System.Windows.Forms.ProgressBar();
+			this.複製jsonToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.儲存jsonToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+			this.saveFileDialog2 = new System.Windows.Forms.SaveFileDialog();
 			((System.ComponentModel.ISupportInitialize)(this.pictureBox)).BeginInit();
 			this.menuStrip1.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.numericUpDown_timer)).BeginInit();
@@ -60,7 +67,7 @@
 			// pictureBox
 			// 
 			this.pictureBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.pictureBox.Location = new System.Drawing.Point(11, 26);
+			this.pictureBox.Location = new System.Drawing.Point(0, 26);
 			this.pictureBox.Margin = new System.Windows.Forms.Padding(2);
 			this.pictureBox.Name = "pictureBox";
 			this.pictureBox.Size = new System.Drawing.Size(400, 400);
@@ -87,30 +94,33 @@
 			this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.openToolStripMenuItem,
             this.clearMapToolStripMenuItem,
-            this.outputImageToolStripMenuItem});
+            this.outputImageToolStripMenuItem,
+            this.toolStripSeparator1,
+            this.複製jsonToolStripMenuItem,
+            this.儲存jsonToolStripMenuItem});
 			this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-			this.fileToolStripMenuItem.Size = new System.Drawing.Size(61, 22);
-			this.fileToolStripMenuItem.Text = "Control";
+			this.fileToolStripMenuItem.Size = new System.Drawing.Size(43, 22);
+			this.fileToolStripMenuItem.Text = "控制";
 			// 
 			// openToolStripMenuItem
 			// 
 			this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-			this.openToolStripMenuItem.Size = new System.Drawing.Size(161, 22);
-			this.openToolStripMenuItem.Text = "Open new map";
+			this.openToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.openToolStripMenuItem.Text = "開啟地圖";
 			this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
 			// 
 			// clearMapToolStripMenuItem
 			// 
 			this.clearMapToolStripMenuItem.Name = "clearMapToolStripMenuItem";
-			this.clearMapToolStripMenuItem.Size = new System.Drawing.Size(161, 22);
-			this.clearMapToolStripMenuItem.Text = "Clear map";
+			this.clearMapToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.clearMapToolStripMenuItem.Text = "清除地圖";
 			this.clearMapToolStripMenuItem.Click += new System.EventHandler(this.clearMapToolStripMenuItem_Click);
 			// 
 			// outputImageToolStripMenuItem
 			// 
 			this.outputImageToolStripMenuItem.Name = "outputImageToolStripMenuItem";
-			this.outputImageToolStripMenuItem.Size = new System.Drawing.Size(161, 22);
-			this.outputImageToolStripMenuItem.Text = "Save Image";
+			this.outputImageToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.outputImageToolStripMenuItem.Text = "匯出圖檔";
 			this.outputImageToolStripMenuItem.Click += new System.EventHandler(this.outputImageToolStripMenuItem_Click);
 			// 
 			// openFileDialog1
@@ -281,11 +291,66 @@
 			this.button_continue_voronoi.UseVisualStyleBackColor = true;
 			this.button_continue_voronoi.Click += new System.EventHandler(this.button_continue_voronoi_Click);
 			// 
+			// label5
+			// 
+			this.label5.AutoSize = true;
+			this.label5.Font = new System.Drawing.Font("微軟正黑體", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+			this.label5.Location = new System.Drawing.Point(416, 295);
+			this.label5.Name = "label5";
+			this.label5.Size = new System.Drawing.Size(117, 21);
+			this.label5.TabIndex = 27;
+			this.label5.Text = "Just get result";
+			// 
+			// button_run
+			// 
+			this.button_run.Font = new System.Drawing.Font("微軟正黑體", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+			this.button_run.Location = new System.Drawing.Point(416, 319);
+			this.button_run.Name = "button_run";
+			this.button_run.Size = new System.Drawing.Size(120, 31);
+			this.button_run.TabIndex = 28;
+			this.button_run.Text = "Run";
+			this.button_run.UseVisualStyleBackColor = true;
+			this.button_run.Click += new System.EventHandler(this.button_run_Click);
+			// 
+			// progressBar_frotune
+			// 
+			this.progressBar_frotune.Location = new System.Drawing.Point(542, 319);
+			this.progressBar_frotune.Name = "progressBar_frotune";
+			this.progressBar_frotune.Size = new System.Drawing.Size(117, 31);
+			this.progressBar_frotune.Step = 1;
+			this.progressBar_frotune.TabIndex = 29;
+			// 
+			// 複製jsonToolStripMenuItem
+			// 
+			this.複製jsonToolStripMenuItem.Name = "複製jsonToolStripMenuItem";
+			this.複製jsonToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.複製jsonToolStripMenuItem.Text = "複製json";
+			this.複製jsonToolStripMenuItem.Click += new System.EventHandler(this.複製jsonToolStripMenuItem_Click);
+			// 
+			// 儲存jsonToolStripMenuItem
+			// 
+			this.儲存jsonToolStripMenuItem.Name = "儲存jsonToolStripMenuItem";
+			this.儲存jsonToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+			this.儲存jsonToolStripMenuItem.Text = "儲存json";
+			this.儲存jsonToolStripMenuItem.Click += new System.EventHandler(this.儲存jsonToolStripMenuItem_Click);
+			// 
+			// toolStripSeparator1
+			// 
+			this.toolStripSeparator1.Name = "toolStripSeparator1";
+			this.toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
+			// 
+			// saveFileDialog2
+			// 
+			this.saveFileDialog2.Filter = "Voronoi Map (*.json) | *.json";
+			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(671, 437);
+			this.Controls.Add(this.progressBar_frotune);
+			this.Controls.Add(this.button_run);
+			this.Controls.Add(this.label5);
 			this.Controls.Add(this.button_continue_voronoi);
 			this.Controls.Add(this.button_pause_voronoi);
 			this.Controls.Add(this.label4);
@@ -338,6 +403,13 @@
 		private System.Windows.Forms.NumericUpDown numericUpDown_line_size;
 		private System.Windows.Forms.Button button_pause_voronoi;
 		private System.Windows.Forms.Button button_continue_voronoi;
+		private System.Windows.Forms.Label label5;
+		private System.Windows.Forms.Button button_run;
+		private System.Windows.Forms.ProgressBar progressBar_frotune;
+		private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+		private System.Windows.Forms.ToolStripMenuItem 複製jsonToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem 儲存jsonToolStripMenuItem;
+		private System.Windows.Forms.SaveFileDialog saveFileDialog2;
 	}
 }
 

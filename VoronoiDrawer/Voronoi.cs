@@ -66,7 +66,7 @@ namespace VoronoiStruct
 
 	class Parabola
 	{
-		public Parabola(VoronoiStruct.Point focus, int n, Rectangle regin, int id)
+		public Parabola(VoronoiStruct.Point focus, float n, Rectangle regin, int id)
 		{
 			this.id = id;
 			points = new List<PointF>();
@@ -150,32 +150,44 @@ namespace VoronoiStruct
 		public void dealIntersect(Parabola obj)
 		{
 			var intersections = this.intersect(obj);
-			if (intersections != null && intersections.GetLength(0) == 2)
+			if (intersections != null)
 			{
-				bool gotErased = false;
-				points.RemoveAll((PointF point) =>
+				if (intersections.GetLength(0) == 2)
 				{
-					if (this.focus.x <= obj.focus.x && point.Y > intersections[0].Y && point.Y < intersections[1].Y)
+					bool gotErased = false;
+					points.RemoveAll((PointF point) =>
 					{
-						gotErased = true;
-						return true;
-					}
-					else
-						return false;
-				});
-				if (gotErased)
-				{
-					obj.points.RemoveAll((PointF point) =>
-					{
-						if (point.Y < intersections[0].Y || point.Y > intersections[1].Y)
+						if (this.focus.x <= obj.focus.x && point.Y > intersections[0].Y && point.Y < intersections[1].Y)
+						{
+							gotErased = true;
 							return true;
+						}
 						else
 							return false;
 					});
+					if (gotErased)
+					{
+						obj.points.RemoveAll((PointF point) =>
+						{
+							if (point.Y < intersections[0].Y || point.Y > intersections[1].Y)
+								return true;
+							else
+								return false;
+						});
+						int[] ids = new int[2];
+						ids[0] = id;
+						ids[1] = obj.id;
+						Intersection temp = new Intersection(intersections[0], intersections[1]);
+						temp.parentID = ids;
+						this.intersections.Add(temp);
+					}
+				}
+				else
+				{
 					int[] ids = new int[2];
 					ids[0] = id;
 					ids[1] = obj.id;
-					Intersection temp = new Intersection(intersections[0], intersections[1]);
+					Intersection temp = new Intersection(intersections[0]);
 					temp.parentID = ids;
 					this.intersections.Add(temp);
 				}
