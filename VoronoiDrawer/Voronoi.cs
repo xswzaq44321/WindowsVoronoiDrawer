@@ -39,6 +39,14 @@ namespace VoronoiStruct
 			enclosed = false;
 			neighborID = new List<int>();
 		}
+		public Polygon(VoronoiStruct.Point focus, Rectangle regin)
+		{
+			edges = new List<Edge>();
+			this.focus = focus;
+			enclosed = false;
+			neighborID = new List<int>();
+			this.regin = regin;
+		}
 		public Polygon(List<Edge> edges, VoronoiStruct.Point focus)
 		{
 			this.edges = new List<Edge>();
@@ -48,8 +56,8 @@ namespace VoronoiStruct
 		}
 
 		public List<Edge> edges;
-		public VoronoiStruct.Point focus;
 		public List<int> neighborID;
+		public VoronoiStruct.Point focus;
 		private bool enclosed;
 		private Rectangle regin;
 
@@ -89,12 +97,10 @@ namespace VoronoiStruct
 		public void optimize()
 		{
 			// fixing edge lines
+			List<VoronoiStruct.Point> borderEdges = new List<VoronoiStruct.Point>();
 			for (int i = 0; i < edges.Count; i++)
 			{
 				var edge = edges[i];
-				double mx = edge.line.b.x - edge.line.a.x;
-				double my = edge.line.b.y - edge.line.a.y;
-				double y0 = 0, ym = 0;
 				if (!regin.Contains(edge.line.a.x, edge.line.a.y) && !regin.Contains(edge.line.b.x, edge.line.b.y))
 				{
 					// edge is out of regin
@@ -102,6 +108,13 @@ namespace VoronoiStruct
 					--i;
 					continue;
 				}
+				if (regin.Contains(edge.line.a.x, edge.line.a.y) && regin.Contains(edge.line.b.x, edge.line.b.y))
+				{
+					continue;
+				}
+				double mx = edge.line.b.x - edge.line.a.x;
+				double my = edge.line.b.y - edge.line.a.y;
+				double y0 = 0, ym = 0;
 				if (mx != 0)
 				{
 					y0 = edge.line.a.y + (0 - edge.line.a.x) * (my / mx);
@@ -110,18 +123,22 @@ namespace VoronoiStruct
 				if (edge.line.a.x < 0)
 				{
 					edge.line.a = new Point(0, (int)y0);
+					borderEdges.Add(edge.line.a);
 				}
 				else if (edge.line.b.x < 0)
 				{
 					edge.line.b = new Point(0, (int)y0);
+					borderEdges.Add(edge.line.b);
 				}
 				else if (edge.line.a.x >= regin.Right)
 				{
 					edge.line.a = new Point(regin.Right - 1, (int)ym);
+					borderEdges.Add(edge.line.a);
 				}
 				else if (edge.line.b.x >= regin.Right)
 				{
 					edge.line.b = new Point(regin.Right - 1, (int)ym);
+					borderEdges.Add(edge.line.b);
 				}
 				double x0 = 0, xm = 0;
 				if (my != 0)
@@ -132,21 +149,77 @@ namespace VoronoiStruct
 				if (edge.line.a.y < 0)
 				{
 					edge.line.a = new Point((int)x0, 0);
+					borderEdges.Add(edge.line.a);
 				}
 				else if (edge.line.b.y < 0)
 				{
 					edge.line.b = new Point((int)x0, 0);
+					borderEdges.Add(edge.line.b);
 				}
 				else if (edge.line.a.y >= regin.Bottom)
 				{
 					edge.line.a = new Point((int)xm, regin.Bottom - 1);
+					borderEdges.Add(edge.line.a);
 				}
 				else if (edge.line.b.y >= regin.Bottom)
 				{
 					edge.line.b = new Point((int)xm, regin.Bottom - 1);
+					borderEdges.Add(edge.line.b);
+				}
+			}
+			if (borderEdges.Count == 2)
+			{
+				borderEdges.RemoveAll((point) => { return point.x < 0 || point.y < 0; });
+				if (borderEdges[0].x == borderEdges[1].x)
+				{
+					var bar = new Edge();
+					bar.line.a = borderEdges[0];
+					bar.line.b = borderEdges[1];
+					this.edges.Add(bar);
+				}
+				else if (borderEdges[0].y == borderEdges[1].y)
+				{
+					var bar = new Edge();
+					bar.line.a = borderEdges[0];
+					bar.line.b = borderEdges[1];
+					this.edges.Add(bar);
+				}
+				else
+				{
+					var endPoint = new VoronoiStruct.Point();
+					if (borderEdges[0].x == 0 || borderEdges[0].x == regin.Bottom - 1)
+					{
+						endPoint.x = borderEdges[0].x;
+					}
+					else
+					{
+						endPoint.x = borderEdges[1].x;
+					}
+					if (borderEdges[0].y == 0 || borderEdges[0].y == regin.Bottom - 1)
+					{
+						endPoint.y = borderEdges[0].y;
+					}
+					else
+					{
+						endPoint.y = borderEdges[1].y;
+					}
+					var bar1 = new Edge();
+					var bar2 = new Edge();
+					bar1.line.a = borderEdges[0];
+					bar1.line.b = endPoint;
+					bar2.line.a = borderEdges[1];
+					bar2.line.b = endPoint;
+					this.edges.Add(bar1);
+					this.edges.Add(bar2);
 				}
 			}
 			sortEdges();
+		}
+		public void reset()
+		{
+			edges.Clear();
+			neighborID.Clear();
+			enclosed = false;
 		}
 	}
 
@@ -154,9 +227,6 @@ namespace VoronoiStruct
 	{
 		public Edge()
 		{
-			parentID = new int[2];
-			parentID[0] = -1;
-			parentID[1] = -1;
 			line = new Line();
 		}
 		public Edge(int id1, int id2)
@@ -211,11 +281,18 @@ namespace VoronoiStruct
 		public double k, h, c;
 		private List<Intersection> intersections;
 		private Rectangle regin;
+		private PointF topValidRange, bottomValidRange;
 
 		public List<Intersection> getIntersections()
 		{
+			List<Intersection> newIntersections = new List<Intersection>();
 			for (int i = 0; i < intersections.Count; i++)
 			{
+				Intersection top = null;
+				foreach (var intersect in intersections)
+				{
+				}
+				/*
 				for (int j = 0; j < intersections[i].points.Length; j++)
 				{
 					if (!contain(intersections[i].points[j]) ||
@@ -236,7 +313,7 @@ namespace VoronoiStruct
 							--j;
 						}
 					}
-				}
+				}*/
 			}
 			return intersections;
 		}
@@ -257,15 +334,23 @@ namespace VoronoiStruct
 			var intersections = this.intersect(obj);
 			if (intersections != null)
 			{
-				if (intersections.GetLength(0) == 2)
+				if (obj.c != 0)
 				{
+					// c != 0 means that two parabolas intersects on infinity
+					// so that we need to remove all between intersection and infinity
 					bool gotErased = false;
 					points.RemoveAll((PointF point) =>
 					{
-						if (this.focus.x <= obj.focus.x && point.Y > intersections[0].Y && point.Y < intersections[1].Y)
+						if (this.focus.x <= obj.focus.x)
 						{
-							gotErased = true;
-							return true;
+							if ((this.focus.y > obj.focus.y && point.Y < intersections[0].Y) ||
+								(this.focus.y < obj.focus.y && point.Y > intersections[0].Y))
+							{
+								gotErased = true;
+								return true;
+							}
+							else
+								return false;
 						}
 						else
 							return false;
@@ -274,61 +359,20 @@ namespace VoronoiStruct
 					{
 						obj.points.RemoveAll((PointF point) =>
 						{
-							if (point.Y < intersections[0].Y || point.Y > intersections[1].Y)
+							if ((this.focus.y > obj.focus.y && point.Y > intersections[0].Y) ||
+								(this.focus.y < obj.focus.y && point.Y < intersections[0].Y))
 								return true;
 							else
 								return false;
 						});
-						int[] ids = new int[2];
-						ids[0] = id;
-						ids[1] = obj.id;
-						Intersection temp = new Intersection(intersections[0], intersections[1]);
-						temp.parentID = ids;
-						this.intersections.Add(temp);
 					}
 				}
-				else
-				{
-					if (obj.c != 0)
-					{
-						// c != 0 means that two parabolas intersects on infinity
-						// so that we need to remove all between intersection and infinity
-						bool gotErased = false;
-						points.RemoveAll((PointF point) =>
-						{
-							if (this.focus.x <= obj.focus.x)
-							{
-								if ((this.focus.y > obj.focus.y && point.Y < intersections[0].Y) ||
-									(this.focus.y < obj.focus.y && point.Y > intersections[0].Y))
-								{
-									gotErased = true;
-									return true;
-								}
-								else
-									return false;
-							}
-							else
-								return false;
-						});
-						if (gotErased)
-						{
-							obj.points.RemoveAll((PointF point) =>
-							{
-								if ((this.focus.y > obj.focus.y && point.Y > intersections[0].Y) ||
-									(this.focus.y < obj.focus.y && point.Y < intersections[0].Y))
-									return true;
-								else
-									return false;
-							});
-						}
-					}
-					int[] ids = new int[2];
-					ids[0] = id;
-					ids[1] = obj.id;
-					Intersection temp = new Intersection(intersections[0]);
-					temp.parentID = ids;
-					this.intersections.Add(temp);
-				}
+				int[] ids = new int[2];
+				ids[0] = id;
+				ids[1] = obj.id;
+				Intersection temp = new Intersection(intersections[0]);
+				temp.parentID = ids;
+				this.intersections.Add(temp);
 			}
 		}
 		public PointF[] intersect(Parabola obj)
@@ -391,22 +435,14 @@ namespace VoronoiStruct
 			parentID = new int[2];
 			parentID[0] = -1;
 			parentID[1] = -1;
-			points = null;
 		}
 		public Intersection(PointF a) :
 			this()
 		{
-			points = new PointF[1];
-			points[0] = a;
+			point = new PointF();
+			point = a;
 		}
-		public Intersection(PointF a, PointF b) :
-			this()
-		{
-			points = new PointF[2];
-			points[0] = a;
-			points[1] = b;
-		}
-		public PointF[] points;
+		public PointF point;
 		public int[] parentID;
 	}
 
@@ -424,16 +460,6 @@ namespace VoronoiStruct
 		}
 
 		public VoronoiStruct.Point a, b;
-
-		public static bool operator ==(Line lhs, Line rhs)
-		{
-			return (lhs.a.x == rhs.a.x && lhs.a.y == rhs.a.y &&
-				lhs.b.x == rhs.b.y && lhs.b.y == rhs.b.y);
-		}
-		public static bool operator !=(Line lhs, Line rhs)
-		{
-			return !(lhs == rhs);
-		}
 	}
 
 	struct Point

@@ -57,6 +57,8 @@
 			this.儲存jsonToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
 			this.saveFileDialog2 = new System.Windows.Forms.SaveFileDialog();
+			this.button_perform_Lloyd = new System.Windows.Forms.Button();
+			this.label6 = new System.Windows.Forms.Label();
 			((System.ComponentModel.ISupportInitialize)(this.pictureBox)).BeginInit();
 			this.menuStrip1.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.numericUpDown_timer)).BeginInit();
@@ -295,7 +297,7 @@
 			// 
 			this.label5.AutoSize = true;
 			this.label5.Font = new System.Drawing.Font("微軟正黑體", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-			this.label5.Location = new System.Drawing.Point(416, 295);
+			this.label5.Location = new System.Drawing.Point(416, 370);
 			this.label5.Name = "label5";
 			this.label5.Size = new System.Drawing.Size(117, 21);
 			this.label5.TabIndex = 27;
@@ -304,7 +306,7 @@
 			// button_run
 			// 
 			this.button_run.Font = new System.Drawing.Font("微軟正黑體", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-			this.button_run.Location = new System.Drawing.Point(416, 319);
+			this.button_run.Location = new System.Drawing.Point(416, 394);
 			this.button_run.Name = "button_run";
 			this.button_run.Size = new System.Drawing.Size(120, 31);
 			this.button_run.TabIndex = 28;
@@ -314,7 +316,7 @@
 			// 
 			// progressBar_frotune
 			// 
-			this.progressBar_frotune.Location = new System.Drawing.Point(542, 319);
+			this.progressBar_frotune.Location = new System.Drawing.Point(542, 394);
 			this.progressBar_frotune.Name = "progressBar_frotune";
 			this.progressBar_frotune.Size = new System.Drawing.Size(117, 31);
 			this.progressBar_frotune.Step = 1;
@@ -343,11 +345,34 @@
 			// 
 			this.saveFileDialog2.Filter = "Voronoi Map (*.json) | *.json";
 			// 
+			// button_perform_Lloyd
+			// 
+			this.button_perform_Lloyd.Font = new System.Drawing.Font("微軟正黑體", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+			this.button_perform_Lloyd.Location = new System.Drawing.Point(416, 319);
+			this.button_perform_Lloyd.Name = "button_perform_Lloyd";
+			this.button_perform_Lloyd.Size = new System.Drawing.Size(120, 31);
+			this.button_perform_Lloyd.TabIndex = 30;
+			this.button_perform_Lloyd.Text = "Lloyd";
+			this.button_perform_Lloyd.UseVisualStyleBackColor = true;
+			this.button_perform_Lloyd.Click += new System.EventHandler(this.button_perform_Lloyd_Click);
+			// 
+			// label6
+			// 
+			this.label6.AutoSize = true;
+			this.label6.Font = new System.Drawing.Font("微軟正黑體", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+			this.label6.Location = new System.Drawing.Point(416, 295);
+			this.label6.Name = "label6";
+			this.label6.Size = new System.Drawing.Size(117, 21);
+			this.label6.TabIndex = 31;
+			this.label6.Text = "perform Lloyd";
+			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(671, 437);
+			this.Controls.Add(this.label6);
+			this.Controls.Add(this.button_perform_Lloyd);
 			this.Controls.Add(this.progressBar_frotune);
 			this.Controls.Add(this.button_run);
 			this.Controls.Add(this.label5);
@@ -410,6 +435,8 @@
 		private System.Windows.Forms.ToolStripMenuItem 複製jsonToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem 儲存jsonToolStripMenuItem;
 		private System.Windows.Forms.SaveFileDialog saveFileDialog2;
+		private System.Windows.Forms.Button button_perform_Lloyd;
+		private System.Windows.Forms.Label label6;
 	}
 }
 

@@ -75,6 +75,30 @@ namespace VoronoiDrawer
 			g.DrawLine(pen, pos1, pos2);
 		}
 
+		void performLloyd()
+		{
+			VoronoiStruct.Voronoi newMap = new VoronoiStruct.Voronoi(vmap.width, vmap.height);
+			Rectangle regin = new Rectangle(0, 0, vmap.width, vmap.height);
+			foreach (var poly in vmap.polygons)
+			{
+				List<VoronoiStruct.Point> points = new List<VoronoiStruct.Point>();
+				foreach (var edge in poly.edges)
+				{
+					VoronoiStruct.Point a = edge.line.a;
+					VoronoiStruct.Point b = edge.line.b;
+					if (!points.Contains(a))
+						points.Add(a);
+					if (!points.Contains(b))
+						points.Add(b);
+				}
+				int cx = points.Sum((point) => { return point.x; }) / points.Count;
+				int cy = points.Sum((point) => { return point.y; }) / points.Count;
+				newMap.polygons.Add(new VoronoiStruct.Polygon(new VoronoiStruct.Point(cx, cy), regin));
+			}
+			vmap = newMap;
+			drawVoronoi(vmap);
+		}
+
 		void drawVoronoi(VoronoiStruct.Voronoi map)
 		{
 			if (map == null)
@@ -119,7 +143,7 @@ namespace VoronoiDrawer
 					VoronoiStruct.Polygon[] tri = new VoronoiStruct.Polygon[3];
 					VoronoiStruct.Edge a = poly.edges[i];
 					VoronoiStruct.Edge b = poly.edges[(i + 1) % poly.edges.Count];
-					if(poly.edges.Count > 2 && onEdge(a) && onEdge(b))
+					if (poly.edges.Count > 2 && onEdge(a) && onEdge(b) || a.parentID == null || b.parentID == null)
 					{
 						continue;
 					}
@@ -195,18 +219,15 @@ namespace VoronoiDrawer
 			pictureBox.Image = bar;
 			g = Graphics.FromImage(bar);
 			var parabolas = oneFortuneStep();
-			foreach (var item in parabolas)
+			foreach (var parabola in parabolas)
 			{
-				var intersections = item.getIntersections();
-				if (item.points.Count > 1 && checkBox_visualize_voronoi.Checked)
+				var intersections = parabola.getIntersections();
+				if (parabola.points.Count > 1 && checkBox_visualize_voronoi.Checked)
 				{
-					g.DrawCurve(greenPen, item.points.ToArray());
-					foreach (var item3 in intersections)
+					g.DrawCurve(greenPen, parabola.points.ToArray());
+					foreach (var intersect in intersections)
 					{
-						foreach (var item4 in item3.points)
-						{
-							drawPoint(orangeBrush, Point.Round(item4));
-						}
+						drawPoint(orangeBrush, Point.Round(intersect.point));
 					}
 				}
 			}
@@ -225,63 +246,47 @@ namespace VoronoiDrawer
 				if (!vmap.polygons[i].isEnclosed())
 					parabolas.Add(getParabola(vmap.polygons[i].focus, i));
 			}
-			foreach (var item in parabolas)
+			foreach (var parabola in parabolas)
 			{
-				foreach (var item2 in parabolas)
+				foreach (var parabola2 in parabolas)
 				{
-					item.dealIntersect(item2);
+					parabola.dealIntersect(parabola2);
 				}
-				if (item.points.Count == 0)
+				if (parabola.points.Count == 0)
 				{
-					vmap.polygons[item.id].setEnclosed(true);
+					vmap.polygons[parabola.id].setEnclosed(true);
 				}
-				var intersections = item.getIntersections();
-				foreach (var item2 in intersections)
+				var intersections = parabola.getIntersections();
+				foreach (var intersect in intersections)
 				{
 					for (int i = 0; i < 2; i++)
 					{
 						VoronoiStruct.Edge edge = null;
-						foreach (var item3 in vmap.polygons[item2.parentID[i]].edges)
+						foreach (var item3 in vmap.polygons[intersect.parentID[i]].edges)
 						{
-							if (item3.parentID.Contains(item2.parentID[0]) &&
-								item3.parentID.Contains(item2.parentID[1]))
+							if (item3.parentID.Contains(intersect.parentID[0]) &&
+								item3.parentID.Contains(intersect.parentID[1]))
 							{
 								edge = item3;
 							}
 						}
 						if (edge == null)
 						{
-							edge = new VoronoiStruct.Edge(item2.parentID[0], item2.parentID[1]);
-							if (item2.points.Length == 1)
-							{
-								edge.line.a = new VoronoiStruct.Point((int)item2.points[0].X, (int)item2.points[0].Y);
-								edge.line.b = new VoronoiStruct.Point((int)item2.points[0].X, (int)item2.points[0].Y);
-							}
-							else
-							{
-								edge.line.a = new VoronoiStruct.Point((int)item2.points[0].X, (int)item2.points[0].Y);
-								edge.line.b = new VoronoiStruct.Point((int)item2.points[1].X, (int)item2.points[1].Y);
-							}
-							vmap.polygons[item2.parentID[i]].edges.Add(edge);
-							vmap.polygons[item2.parentID[i]].neighborID.Add(item2.parentID[1 - i]);
+							edge = new VoronoiStruct.Edge(intersect.parentID[0], intersect.parentID[1]);
+							edge.line.a = new VoronoiStruct.Point((int)intersect.point.X, (int)intersect.point.Y);
+							edge.line.b = new VoronoiStruct.Point((int)intersect.point.X, (int)intersect.point.Y);
+							vmap.polygons[intersect.parentID[i]].edges.Add(edge);
+							vmap.polygons[intersect.parentID[i]].neighborID.Add(intersect.parentID[1 - i]);
 						}
 						else
 						{
-							if (item2.points.Length == 1)
+							if (distance(edge.line.a, intersect.point) < distance(edge.line.b, intersect.point))
 							{
-								if (distance(edge.line.a, item2.points[0]) < distance(edge.line.b, item2.points[0]))
-								{
-									edge.line.a = new VoronoiStruct.Point((int)item2.points[0].X, (int)item2.points[0].Y);
-								}
-								else
-								{
-									edge.line.b = new VoronoiStruct.Point((int)item2.points[0].X, (int)item2.points[0].Y);
-								}
+								edge.line.a = new VoronoiStruct.Point((int)intersect.point.X, (int)intersect.point.Y);
 							}
 							else
 							{
-								edge.line.a = new VoronoiStruct.Point((int)item2.points[0].X, (int)item2.points[0].Y);
-								edge.line.b = new VoronoiStruct.Point((int)item2.points[1].X, (int)item2.points[1].Y);
+								edge.line.b = new VoronoiStruct.Point((int)intersect.point.X, (int)intersect.point.Y);
 							}
 						}
 					}
@@ -423,6 +428,11 @@ namespace VoronoiDrawer
 				string json = JsonConvert.SerializeObject(vmap, Formatting.Indented);
 				System.IO.File.WriteAllText(saveFileDialog2.FileName, json);
 			}
+		}
+
+		private void button_perform_Lloyd_Click(object sender, EventArgs e)
+		{
+			performLloyd();
 		}
 
 		private void button_stop_perform_voronoi_Click(object sender, EventArgs e)
