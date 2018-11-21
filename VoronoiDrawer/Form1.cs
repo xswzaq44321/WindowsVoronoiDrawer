@@ -28,6 +28,7 @@ namespace VoronoiDrawer
 			circleSize = new Size(circleR, circleR);
 			pictureBox.AllowDrop = true;
 			timer1.Interval = (int)numericUpDown_timer.Value;
+			this.Form1_Resize(null, null);
 		}
 
 		Bitmap bmp;
@@ -42,6 +43,12 @@ namespace VoronoiDrawer
 		{
 			StreamReader sr = new StreamReader(filePath);
 			string json = sr.ReadToEnd();
+			initMap(json, out vmap);
+			sr.Close();
+		}
+
+		void initMap(string json, out VoronoiStruct.Voronoi vmap)
+		{
 			var map = JsonConvert.DeserializeObject<VoronoiStruct.Voronoi>(json);
 			foreach (var poly in map.polygons)
 			{
@@ -52,7 +59,6 @@ namespace VoronoiDrawer
 			}
 			vmap = map;
 			sweepLine = null;
-			sr.Close();
 		}
 
 		void drawPoint(Brush brush, VoronoiStruct.Point pos)
@@ -190,6 +196,13 @@ namespace VoronoiDrawer
 			}
 		}
 
+		private void 貼上jsonToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			string json = Clipboard.GetText();
+			initMap(json, out vmap);
+			drawVoronoi(vmap);
+		}
+
 		private void 開啟ToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			if (openFileDialog1.ShowDialog() == DialogResult.OK)
@@ -282,6 +295,8 @@ namespace VoronoiDrawer
 			if (sweepLine == null)
 				sweepLine = new VoronoiStruct.SweepLine(vmap);
 			while (sweepLine.nextEvent() != double.MaxValue) ;
+			sweepLine.finishEdges();
+			drawVoronoi(vmap);
 		}
 
 		private void button_perform_Lloyd_Click_1(object sender, EventArgs e)
@@ -296,6 +311,8 @@ namespace VoronoiDrawer
 			if (sweepLine == null)
 				sweepLine = new VoronoiStruct.SweepLine(vmap);
 			double L = sweepLine.nextEvent();
+			if (L == double.MaxValue)
+				sweepLine.finishEdges();
 			drawVoronoi(vmap);
 			drawCurrentStep();
 		}
@@ -314,6 +331,7 @@ namespace VoronoiDrawer
 			double L = sweepLine.nextEvent();
 			if (L == double.MaxValue)
 			{
+				sweepLine.finishEdges();
 				timer1.Stop();
 			}
 			drawVoronoi(vmap);

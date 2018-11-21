@@ -283,6 +283,12 @@ namespace VoronoiStruct
 				return;
 			}
 			pj = beachPolys[pos];
+			Polygon pj_l = null;
+			Polygon pj_r = null;
+			if (pos - 1 >= 0)
+				pj_l = beachPolys[pos - 1];
+			if (pos + 1 < beachPolys.Count)
+				pj_r = beachPolys[pos + 1];
 			beachPolys.Insert(pos + 1, pi);
 			beachPolys.Insert(pos + 2, pj);
 			// now pi is on pos + 1
@@ -296,7 +302,9 @@ namespace VoronoiStruct
 			// remove old triple involving pj
 			circleEvents.RemoveAll((e) =>
 			{
-				if (e.relevant[1] == pj)
+				/* implement this code */
+				/* find pos - 1, pos, pos + 1 pattern */
+				if (e.relevant[0] == pj_l && e.relevant[1] == pj && e.relevant[2] == pj_r)
 					return true;
 				else
 					return false;
@@ -306,10 +314,17 @@ namespace VoronoiStruct
 			{
 				if ((j - 1) < 0 || (j + 1) >= beachPolys.Count)
 					continue;
-				Event circleEve = new Event(beachPolys[j - 1], beachPolys[j], beachPolys[j + 1]);
-				if (circleEve.X >= L)
+				Polygon p1 = beachPolys[j - 1];
+				Polygon p2 = beachPolys[j];
+				Polygon p3 = beachPolys[j + 1];
+				// b to a cross c to a is smaller than zero means it's a left turn
+				if ((p2.focus.x - p1.focus.x) * (p3.focus.y - p1.focus.y) - (p3.focus.x - p1.focus.x) * (p2.focus.y - p1.focus.y) < 0)
 				{
-					circleEvents.Add(circleEve);
+					Event circleEve = new Event(p1, p2, p3);
+					if (circleEve.X >= L)
+					{
+						circleEvents.Add(circleEve);
+					}
 				}
 			}
 		}
@@ -350,7 +365,7 @@ namespace VoronoiStruct
 						if ((pp2.focus.x - pp1.focus.x) * (pp3.focus.y - pp1.focus.y) - (pp3.focus.x - pp1.focus.x) * (pp2.focus.y - pp1.focus.y) < 0)
 						{
 							Event cirEve = new Event(pp1, pp2, pp3);
-							if (cirEve.X > L)
+							if (cirEve.X >= L)
 							{
 								circleEvents.Add(cirEve);
 							}
@@ -364,7 +379,7 @@ namespace VoronoiStruct
 						if ((pp2.focus.x - pp1.focus.x) * (pp3.focus.y - pp1.focus.y) - (pp3.focus.x - pp1.focus.x) * (pp2.focus.y - pp1.focus.y) < 0)
 						{
 							Event cirEve = new Event(pp1, pp2, pp3);
-							if (cirEve.X > L)
+							if (cirEve.X >= L)
 							{
 								circleEvents.Add(cirEve);
 							}
@@ -388,6 +403,32 @@ namespace VoronoiStruct
 			if (err)
 				System.Diagnostics.Debug.WriteLine("Error dealCircleEvent! no matching pattern in beach");
 			return;
+		}
+
+		public void finishEdges()
+		{
+			// set L large enough
+			L = 2 * vmap.width + 2 * vmap.height;
+			for (int i = 0; i < beachPolys.Count - 1; i++)
+			{
+				var p1 = beachPolys[i];
+				var p2 = beachPolys[i + 1];
+				PointF cross = getIntersect(p1.focus, p2.focus);
+				foreach (var edge in p1.edges)
+				{
+					if (edge.getParent().Contains(p2.id))
+					{
+						edge.line.b = new Point(cross);
+					}
+				}
+				foreach (var edge in p2.edges)
+				{
+					if (edge.getParent().Contains(p1.id))
+					{
+						edge.line.b = new Point(cross);
+					}
+				}
+			}
 		}
 
 		// get points for drawing purpose
