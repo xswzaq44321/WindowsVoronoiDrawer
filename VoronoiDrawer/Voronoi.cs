@@ -19,11 +19,11 @@ namespace VoronoiStruct
 			this.width = width;
 			this.height = height;
 		}
-		public Voronoi(Voronoi vmap)
+		public Voronoi(Voronoi old)
 		{
-			this.width = vmap.width;
-			this.height = vmap.height;
-			this.polygons = new List<Polygon>(vmap.polygons);
+			this.width = old.width;
+			this.height = old.height;
+			this.polygons = old.polygons.Select(bar => new Polygon(bar)).ToList();
 		}
 		public int width, height;
 		public List<Polygon> polygons;
@@ -45,6 +45,12 @@ namespace VoronoiStruct
 		{
 			this.edges = new List<Edge>();
 			this.focus = focus;
+		}
+		public Polygon(Polygon old)
+		{
+			this.edges = old.edges.Select(bar => new Edge(bar)).ToList();
+			this.focus = old.focus;
+			this.id = old.id;
 		}
 
 		public List<Edge> edges;
@@ -138,6 +144,7 @@ namespace VoronoiStruct
 				if (borderEdges[0].x == borderEdges[1].x)
 				{
 					var bar = new Edge();
+					bar.deAbstract();
 					bar.line.a = borderEdges[0];
 					bar.line.b = borderEdges[1];
 					this.edges.Add(bar);
@@ -145,6 +152,7 @@ namespace VoronoiStruct
 				else if (borderEdges[0].y == borderEdges[1].y)
 				{
 					var bar = new Edge();
+					bar.deAbstract();
 					bar.line.a = borderEdges[0];
 					bar.line.b = borderEdges[1];
 					this.edges.Add(bar);
@@ -170,6 +178,8 @@ namespace VoronoiStruct
 					}
 					var bar1 = new Edge();
 					var bar2 = new Edge();
+					bar1.deAbstract();
+					bar2.deAbstract();
 					bar1.line.a = borderEdges[0];
 					bar1.line.b = endPoint;
 					bar2.line.a = borderEdges[1];
@@ -199,10 +209,13 @@ namespace VoronoiStruct
 				edgeDegrees[i] = degree;
 
 				// sort a, b
-				if (ta < -Math.PI / 2 && tb > Math.PI / 2)
-					ta += 2 * Math.PI;
-				else if (ta > Math.PI / 2 && tb < -Math.PI / 2)
-					tb += 2 * Math.PI;
+				if(degree < -Math.PI / 2 || degree > Math.PI / 2)
+				{ // angle of edge is behind focus
+					if (ta < 0 && tb > 0)
+						ta += 2 * Math.PI;
+					else if (ta > 0 && tb < 0)
+						tb += 2 * Math.PI;
+				}
 				if (ta >= tb)
 				{
 					var temp = edges[i].line.a;
@@ -219,27 +232,27 @@ namespace VoronoiStruct
 	{
 		public Edge()
 		{
-			line = new Line();
+			line = new Line(-1, -1, -1, -1);
 			parentID = null;
 			is_abstract = true;
 		}
 		public Edge(int id1, int id2, bool is_abstract = false)
 		{
-			line = new Line();
+			line = new Line(-1, -1, -1, -1);
 			parentID = new int[2];
 			parentID[0] = id1;
 			parentID[1] = id2;
 			this.is_abstract = is_abstract;
 		}
-		public Edge(Edge cpy)
+		public Edge(Edge old)
 		{
 			line = new Line();
-			line.a = cpy.line.a;
-			line.b = cpy.line.b;
+			line.a = old.line.a;
+			line.b = old.line.b;
 			parentID = new int[2];
-			parentID[0] = cpy.parentID[0];
-			parentID[1] = cpy.parentID[1];
-			this.is_abstract = cpy.is_abstract;
+			parentID[0] = old.parentID[0];
+			parentID[1] = old.parentID[1];
+			this.is_abstract = old.is_abstract;
 		}
 
 		public Line line;
@@ -311,10 +324,10 @@ namespace VoronoiStruct
 			siteEvents = new List<Event>();
 			circleEvents = new List<Event>();
 		}
-		public SweepLine(VoronoiStruct.Voronoi vmap) :
+		public SweepLine(ref VoronoiStruct.Voronoi vmap) :
 			this()
 		{
-			this.vmap = new Voronoi(vmap);
+			this.vmap = vmap;
 			for (int i = 0; i < this.vmap.polygons.Count; i++)
 			{
 				var bar = this.vmap.polygons[i];

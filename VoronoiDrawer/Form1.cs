@@ -104,7 +104,9 @@ namespace VoronoiDrawer
 			{
 				foreach (var edge in poly.edges)
 				{
-					if (!edge.isAbstract())
+					if (!edge.isAbstract() && 
+						(edge.line.a.x != -1 || edge.line.a.y != -1) && 
+						(edge.line.b.x != -1 || edge.line.b.y != -1))
 					{
 						drawLine(blackPen, edge.line);
 					}
@@ -134,6 +136,7 @@ namespace VoronoiDrawer
 				newMap.polygons.Add(new VoronoiStruct.Polygon(new VoronoiStruct.Point(cx, cy)));
 			}
 			vmap = newMap;
+			sweepLine = null;
 			drawVoronoi(vmap);
 		}
 
@@ -295,7 +298,7 @@ namespace VoronoiDrawer
 			if (vmap == null)
 				return;
 			if (sweepLine == null)
-				sweepLine = new VoronoiStruct.SweepLine(vmap);
+				sweepLine = new VoronoiStruct.SweepLine(ref vmap);
 			while (sweepLine.nextEvent() != double.MaxValue) ;
 			sweepLine.finishEdges();
 			Rectangle regin = new Rectangle(0, 0, vmap.width, vmap.height);
@@ -317,7 +320,7 @@ namespace VoronoiDrawer
 			if (vmap == null)
 				return;
 			if (sweepLine == null)
-				sweepLine = new VoronoiStruct.SweepLine(vmap);
+				sweepLine = new VoronoiStruct.SweepLine(ref vmap);
 			double L = sweepLine.nextEvent();
 			if (L == double.MaxValue)
 				sweepLine.finishEdges();
@@ -330,7 +333,7 @@ namespace VoronoiDrawer
 			if (vmap == null)
 				return;
 			if (sweepLine == null)
-				sweepLine = new VoronoiStruct.SweepLine(vmap);
+				sweepLine = new VoronoiStruct.SweepLine(ref vmap);
 			timer1.Start();
 		}
 
