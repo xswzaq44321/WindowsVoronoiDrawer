@@ -75,6 +75,8 @@ namespace VoronoiDrawer
 
 		void drawLine(Pen pen, VoronoiStruct.Point pos1, VoronoiStruct.Point pos2)
 		{
+			if (pos1.x < 0 && pos2.x < 0 || pos1.y < 0 && pos2.y < 0)
+				return;
 			g.DrawLine(pen, pos1.x, pos1.y, pos2.x, pos2.y);
 		}
 		void drawLine(Pen pen, VoronoiStruct.Line line)
@@ -296,6 +298,12 @@ namespace VoronoiDrawer
 				sweepLine = new VoronoiStruct.SweepLine(vmap);
 			while (sweepLine.nextEvent() != double.MaxValue) ;
 			sweepLine.finishEdges();
+			Rectangle regin = new Rectangle(0, 0, vmap.width, vmap.height);
+			foreach (var poly in vmap.polygons)
+			{
+				poly.optimize(regin);
+			}
+
 			drawVoronoi(vmap);
 		}
 

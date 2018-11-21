@@ -50,6 +50,169 @@ namespace VoronoiStruct
 		public List<Edge> edges;
 		public VoronoiStruct.Point focus;
 		public int id;
+
+		public void optimize(Rectangle regin)
+		{
+			// fixing edge lines
+			List<VoronoiStruct.Point> borderEdges = new List<VoronoiStruct.Point>();
+			for (int i = 0; i < edges.Count; i++)
+			{
+				var edge = edges[i];
+				if (!regin.Contains(edge.line.a.x, edge.line.a.y) && !regin.Contains(edge.line.b.x, edge.line.b.y))
+				{
+					// edge is out of regin
+					edges.Remove(edge);
+					--i;
+					continue;
+				}
+				if (regin.Contains(edge.line.a.x, edge.line.a.y) && regin.Contains(edge.line.b.x, edge.line.b.y))
+				{
+					continue;
+				}
+				double mx = edge.line.b.x - edge.line.a.x;
+				double my = edge.line.b.y - edge.line.a.y;
+				double y0 = 0, ym = 0;
+				bool xout = false, yout = false;
+				if (mx != 0)
+				{
+					y0 = edge.line.a.y + (0 - edge.line.a.x) * (my / mx);
+					ym = edge.line.a.y + (regin.Right - 1 - edge.line.a.x) * (my / mx);
+				}
+				if (edge.line.a.x < 0)
+				{
+					edge.line.a = new Point(0, (int)y0);
+				}
+				else if (edge.line.b.x < 0)
+				{
+					edge.line.b = new Point(0, (int)y0);
+				}
+				else if (edge.line.a.x >= regin.Right)
+				{
+					edge.line.a = new Point(regin.Right - 1, (int)ym);
+				}
+				else if (edge.line.b.x >= regin.Right)
+				{
+					edge.line.b = new Point(regin.Right - 1, (int)ym);
+				}
+				double x0 = 0, xm = 0;
+				if (my != 0)
+				{
+					x0 = edge.line.a.x + (0 - edge.line.a.y) * (mx / my);
+					xm = edge.line.a.x + (regin.Bottom - 1 - edge.line.a.y) * (mx / my);
+				}
+				if (edge.line.a.y < 0)
+				{
+					edge.line.a = new Point((int)x0, 0);
+				}
+				else if (edge.line.b.y < 0)
+				{
+					edge.line.b = new Point((int)x0, 0);
+				}
+				else if (edge.line.a.y >= regin.Bottom)
+				{
+					edge.line.a = new Point((int)xm, regin.Bottom - 1);
+				}
+				else if (edge.line.b.y >= regin.Bottom)
+				{
+					edge.line.b = new Point((int)xm, regin.Bottom - 1);
+				}
+				if (edge.line.a.x == 0 || edge.line.a.x == regin.Bottom - 1)
+				{
+					borderEdges.Add(edge.line.a);
+				}
+				else if (edge.line.b.x == 0 || edge.line.b.x == regin.Bottom - 1)
+				{
+					borderEdges.Add(edge.line.b);
+				}
+				if (edge.line.a.y == 0 || edge.line.a.y == regin.Bottom - 1)
+				{
+					borderEdges.Add(edge.line.a);
+				}
+				else if (edge.line.b.y == 0 || edge.line.b.y == regin.Bottom - 1)
+				{
+					borderEdges.Add(edge.line.b);
+				}
+			}
+			if (borderEdges.Count == 2)
+			{
+				if (borderEdges[0].x == borderEdges[1].x)
+				{
+					var bar = new Edge();
+					bar.line.a = borderEdges[0];
+					bar.line.b = borderEdges[1];
+					this.edges.Add(bar);
+				}
+				else if (borderEdges[0].y == borderEdges[1].y)
+				{
+					var bar = new Edge();
+					bar.line.a = borderEdges[0];
+					bar.line.b = borderEdges[1];
+					this.edges.Add(bar);
+				}
+				else
+				{
+					var endPoint = new VoronoiStruct.Point();
+					if (borderEdges[0].x == 0 || borderEdges[0].x == regin.Bottom - 1)
+					{
+						endPoint.x = borderEdges[0].x;
+					}
+					else
+					{
+						endPoint.x = borderEdges[1].x;
+					}
+					if (borderEdges[0].y == 0 || borderEdges[0].y == regin.Bottom - 1)
+					{
+						endPoint.y = borderEdges[0].y;
+					}
+					else
+					{
+						endPoint.y = borderEdges[1].y;
+					}
+					var bar1 = new Edge();
+					var bar2 = new Edge();
+					bar1.line.a = borderEdges[0];
+					bar1.line.b = endPoint;
+					bar2.line.a = borderEdges[1];
+					bar2.line.b = endPoint;
+					this.edges.Add(bar1);
+					this.edges.Add(bar2);
+				}
+			}
+			sortEdges();
+		}
+		private void sortEdges()
+		{
+			double[] edgeDegrees = new double[edges.Count];
+			Edge[] edge = edges.ToArray();
+			for (int i = 0; i < edges.Count; i++)
+			{
+				// add average degree of edge to array for sorting uses later
+				double ta = Math.Atan2(edges[i].line.a.y - focus.y, edges[i].line.a.x - focus.x);
+				double tb = Math.Atan2(edges[i].line.b.y - focus.y, edges[i].line.b.x - focus.x);
+				double degree = (ta + tb) / 2;
+				if (Math.Abs(ta - tb) > Math.PI)
+				{
+					degree += Math.PI;
+					for (; degree > Math.PI; degree -= 2 * Math.PI) ;
+					for (; degree < -Math.PI; degree += 2 * Math.PI) ;
+				}
+				edgeDegrees[i] = degree;
+
+				// sort a, b
+				if (ta < -Math.PI / 2 && tb > Math.PI / 2)
+					ta += 2 * Math.PI;
+				else if (ta > Math.PI / 2 && tb < -Math.PI / 2)
+					tb += 2 * Math.PI;
+				if (ta >= tb)
+				{
+					var temp = edges[i].line.a;
+					edge[i].line.a = edges[i].line.b;
+					edge[i].line.b = temp;
+				}
+			}
+			Array.Sort(edgeDegrees, edge);
+			edges = new List<Edge>(edge);
+		}
 	}
 
 	class Edge
@@ -67,6 +230,16 @@ namespace VoronoiStruct
 			parentID[0] = id1;
 			parentID[1] = id2;
 			this.is_abstract = is_abstract;
+		}
+		public Edge(Edge cpy)
+		{
+			line = new Line();
+			line.a = cpy.line.a;
+			line.b = cpy.line.b;
+			parentID = new int[2];
+			parentID[0] = cpy.parentID[0];
+			parentID[1] = cpy.parentID[1];
+			this.is_abstract = cpy.is_abstract;
 		}
 
 		public Line line;
@@ -242,8 +415,8 @@ namespace VoronoiStruct
 				}
 				Edge bar = new Edge(pi, pk);
 				bar.line.a = new Point(point);
-				vmap.polygons[pi].edges.Add(bar);
-				vmap.polygons[pk].edges.Add(bar);
+				vmap.polygons[pi].edges.Add(new Edge(bar));
+				vmap.polygons[pk].edges.Add(new Edge(bar));
 				dealCircleEvent(nextEvent);
 			}
 			return L;
@@ -295,9 +468,8 @@ namespace VoronoiStruct
 			pos = pos + 1;
 
 			// add to edges
-			Edge edge = new Edge(pi.id, pj.id, true);
-			vmap.polygons[pi.id].edges.Add(edge);
-			vmap.polygons[pj.id].edges.Add(edge);
+			vmap.polygons[pi.id].edges.Add(new Edge(pi.id, pj.id, true));
+			vmap.polygons[pj.id].edges.Add(new Edge(pi.id, pj.id, true));
 
 			// remove old triple involving pj
 			circleEvents.RemoveAll((e) =>
@@ -465,7 +637,7 @@ namespace VoronoiStruct
 			}
 			else if (beachPolys.Count > 1)
 			{
-				for (int i = 0; i < beachPolys.Count - 1; i++)
+				for (int i = 0; i < beachPolys.Count - 1 && y < vmap.height + 10; i++)
 				{
 					var poly = beachPolys[i];
 					parabolas.Add(new List<PointF>());
