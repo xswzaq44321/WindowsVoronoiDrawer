@@ -332,6 +332,10 @@ namespace VoronoiStruct
 			{
 				var bar = this.vmap.polygons[i];
 				bar.id = i;
+				if (i < vmap.polygons.Count - 1 && vmap.polygons[i].focus.x == vmap.polygons[i + 1].focus.x)
+				{
+					bar.focus.x++; 
+				}
 				addSite(new Event(bar));
 			}
 		}
