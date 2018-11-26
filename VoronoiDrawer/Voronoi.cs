@@ -209,7 +209,7 @@ namespace VoronoiStruct
 				edgeDegrees[i] = degree;
 
 				// sort a, b
-				if(degree < -Math.PI / 2 || degree > Math.PI / 2)
+				if (degree < -Math.PI / 2 || degree > Math.PI / 2)
 				{ // angle of edge is behind focus
 					if (ta < 0 && tb > 0)
 						ta += 2 * Math.PI;
@@ -320,7 +320,7 @@ namespace VoronoiStruct
 	{
 		public SweepLine()
 		{
-			beachPolys = new List<Polygon>();
+			beachParabolas = new List<Parabola>();
 			siteEvents = new List<Event>();
 			circleEvents = new List<Event>();
 		}
@@ -334,45 +334,36 @@ namespace VoronoiStruct
 				bar.id = i;
 				if (i < vmap.polygons.Count - 1 && vmap.polygons[i].focus.x == vmap.polygons[i + 1].focus.x)
 				{
-					bar.focus.x++; 
+					bar.focus.x++;
 				}
-				addSite(new Event(bar));
+				siteEvents.Add(new Event(bar));
 			}
 		}
 
-		// current location of sweepLine
+		// L := current location of sweepLine
 		public double L;
-		public List<Polygon> beachPolys;
+		public List<Parabola> beachParabolas;
 		public List<Event> siteEvents;
 		public List<Event> circleEvents;
 		public VoronoiStruct.Voronoi vmap;
 
-		public void addSite(Event e)
-		{
-			siteEvents.Add(e);
-		}
-
 		// moving forward swppeLine and deal with events
 		public double nextEvent()
 		{
-			if (siteEvents.Count + circleEvents.Count < 0)
-			{
-				return double.MaxValue;
-			}
 			L = double.MaxValue;
-			Event nextEvent = null;
-			foreach (var e in siteEvents.Union(circleEvents))
-			{
-				if (e.X < L)
-				{
-					L = e.X;
-					nextEvent = e;
-				}
+			if (siteEvents.Count + circleEvents.Count < 0)
+			{ // no more events to do
+				return L;
 			}
+			Event nextEvent = null;
+			nextEvent = siteEvents.Min();
+			if (nextEvent == null || nextEvent.X <= circleEvents.Min()?.X)
+				nextEvent = circleEvents.Min();
 			if (nextEvent == null)
 			{
 				return L;
 			}
+			L = nextEvent.X;
 			if (!nextEvent.isCircle)
 			{
 				beachAdd(nextEvent.relevant[0]);
@@ -434,87 +425,64 @@ namespace VoronoiStruct
 				bar.line.a = new Point(point);
 				vmap.polygons[pi].edges.Add(new Edge(bar));
 				vmap.polygons[pk].edges.Add(new Edge(bar));
-				dealCircleEvent(nextEvent);
+				dealAfterCircleEvent(nextEvent);
 			}
 			return L;
 		}
 
-		public void beachAdd(Polygon pi)
+		public void beachAdd(Polygon p)
 		{
 			int pos = 0;
-			Polygon pj = null;
+			Parabola pj = null;
 			// find which arc to insert pi
-			for (int i = 0; i < beachPolys.Count - 2; i++)
+			for (int i = 0; i < beachParabolas.Count - 2; i++)
 			{
-				var intersect = getIntersect(beachPolys[i].focus, beachPolys[i + 1].focus);
-				var intersect2 = getIntersect(beachPolys[i + 1].focus, beachPolys[i + 2].focus);
-				if (intersect.Y < pi.focus.y && intersect2.Y > pi.focus.y)
+				var intersect = beachParabolas[i].getIntersect(beachParabolas[i + 1], L);
+				var intersect2 = beachParabolas[i + 1].getIntersect(beachParabolas[i + 2], L);
+				if (intersect.Y < p.focus.y && intersect2.Y > p.focus.y)
 				{
 					pos = i + 1;
 					break;
 				}
-				else if (i == 0 && intersect.Y > pi.focus.y)
+				else if (i == 0 && intersect.Y > p.focus.y)
 				{
 					// first one
 					pos = i;
 					break;
 				}
-				else if (i == beachPolys.Count - 2 - 1)
+				else if (i == beachParabolas.Count - 2 - 1)
 				{
 					// last one
-					pos = beachPolys.Count - 1;
+					pos = beachParabolas.Count - 1;
 					break;
 				}
 			}
-			if (beachPolys.Count == 0)
+			if (beachParabolas.Count == 0)
 			{
 				// beach is empty
-				beachPolys.Add(pi);
+				beachParabolas.Add(new Parabola(p));
 				return;
 			}
-			pj = beachPolys[pos];
-			Polygon pj_l = null;
-			Polygon pj_r = null;
-			if (pos - 1 >= 0)
-				pj_l = beachPolys[pos - 1];
-			if (pos + 1 < beachPolys.Count)
-				pj_r = beachPolys[pos + 1];
-			beachPolys.Insert(pos + 1, pi);
-			beachPolys.Insert(pos + 2, pj);
-			// now pi is on pos + 1
+			pj = beachParabolas[pos];
+			beachParabolas.Insert(pos + 1, new Parabola(p));
+			beachParabolas.Insert(pos + 2, new Parabola(pj, false));
+			// now p is on pos + 1
 			pos = pos + 1;
 
 			// add to edges
-			vmap.polygons[pi.id].edges.Add(new Edge(pi.id, pj.id, true));
-			vmap.polygons[pj.id].edges.Add(new Edge(pi.id, pj.id, true));
+			vmap.polygons[p.id].edges.Add(new Edge(p.id, pj.parent.id, true));
+			pj.parent.edges.Add(new Edge(p.id, pj.parent.id, true));
 
-			// remove old triple involving pj
-			circleEvents.RemoveAll((e) =>
-			{
-				/* implement this code */
-				/* find pos - 1, pos, pos + 1 pattern */
-				if (e.relevant[0] == pj_l && e.relevant[1] == pj && e.relevant[2] == pj_r)
-					return true;
-				else
-					return false;
-			});
-			// adding new triple involving pi (which is left 2 & right 2 of pi with pi)
+			// remove old pj circle event
+			circleEvents.Remove(pj.e);
+			pj.e = null;
+
+			// adding new triple involving p (which is left 2 & right 2 of pi with pi)
 			for (int j = pos - 1; j <= pos + 1; j += 2)
 			{
-				if ((j - 1) < 0 || (j + 1) >= beachPolys.Count)
-					continue;
-				Polygon p1 = beachPolys[j - 1];
-				Polygon p2 = beachPolys[j];
-				Polygon p3 = beachPolys[j + 1];
-				// b to a cross c to a is smaller than zero means it's a left turn
-				if ((p2.focus.x - p1.focus.x) * (p3.focus.y - p1.focus.y) - (p3.focus.x - p1.focus.x) * (p2.focus.y - p1.focus.y) < 0)
-				{
-					Event circleEve = new Event(p1, p2, p3);
-					if (circleEve.X >= L)
-					{
-						circleEvents.Add(circleEve);
-					}
-				}
+				//if ((j - 1) < 0 || (j + 1) >= beachParabolas.Count)
+				//	continue;
+				checkCircleEvent(j);
 			}
 		}
 
@@ -536,58 +504,28 @@ namespace VoronoiStruct
 		}
 
 		// delete e from circleEvents and corresponding p from beachLine
-		public void dealCircleEvent(Event e)
+		public void dealAfterCircleEvent(Event e)
 		{
 			bool err = true;
 			int p1 = e.relevant[0].id;
 			int p2 = e.relevant[1].id;
 			int p3 = e.relevant[2].id;
-			for (int i = 0; i < beachPolys.Count - 2; i++)
+			int p2Pos = -1;
+			for (int i = 0; i < beachParabolas.Count - 2; i++)
 			{
-				if (beachPolys[i].id == p1 && beachPolys[i + 1].id == p2 && beachPolys[i + 2].id == p3)
+				if (beachParabolas[i].e == e)
 				{
-					if (i > 0)
-					{
-						var pp1 = beachPolys[i - 1];
-						var pp2 = beachPolys[i];
-						var pp3 = beachPolys[i + 2];
-						if ((pp2.focus.x - pp1.focus.x) * (pp3.focus.y - pp1.focus.y) - (pp3.focus.x - pp1.focus.x) * (pp2.focus.y - pp1.focus.y) < 0)
-						{
-							Event cirEve = new Event(pp1, pp2, pp3);
-							if (cirEve.X >= L)
-							{
-								circleEvents.Add(cirEve);
-							}
-						}
-					}
-					if (i < beachPolys.Count - 3)
-					{
-						var pp1 = beachPolys[i];
-						var pp2 = beachPolys[i + 2];
-						var pp3 = beachPolys[i + 3];
-						if ((pp2.focus.x - pp1.focus.x) * (pp3.focus.y - pp1.focus.y) - (pp3.focus.x - pp1.focus.x) * (pp2.focus.y - pp1.focus.y) < 0)
-						{
-							Event cirEve = new Event(pp1, pp2, pp3);
-							if (cirEve.X >= L)
-							{
-								circleEvents.Add(cirEve);
-							}
-						}
-					}
+					p2Pos = i;
 					err = false;
-					beachPolys.RemoveAt(i + 1);
+					beachParabolas.RemoveAt(i);
 					break;
 				}
 			}
 			circleEvents.Remove(e);
-			circleEvents.RemoveAll((e2) =>
-			{
-				if (e2.relevant[0] == e.relevant[1] && e2.relevant[1] == e.relevant[2])
-					return true;
-				if (e2.relevant[1] == e.relevant[0] && e2.relevant[2] == e.relevant[1])
-					return true;
-				return false;
-			});
+			// check circle Event on left side of p2
+			checkCircleEvent(p2Pos - 1);
+			// check circle Event on right side of p2
+			checkCircleEvent(p2Pos);
 
 			if (err)
 				System.Diagnostics.Debug.WriteLine("Error dealCircleEvent! no matching pattern in beach");
@@ -598,21 +536,21 @@ namespace VoronoiStruct
 		{
 			// set L large enough
 			L = 2 * vmap.width + 2 * vmap.height;
-			for (int i = 0; i < beachPolys.Count - 1; i++)
+			for (int i = 0; i < beachParabolas.Count - 1; i++)
 			{
-				var p1 = beachPolys[i];
-				var p2 = beachPolys[i + 1];
-				PointF cross = getIntersect(p1.focus, p2.focus);
-				foreach (var edge in p1.edges)
+				var p1 = beachParabolas[i];
+				var p2 = beachParabolas[i + 1];
+				PointF cross = p1.getIntersect(p2, L);
+				foreach (var edge in p1.parent.edges)
 				{
-					if (edge.getParent().Contains(p2.id))
+					if (edge.getParent().Contains(p2.parent.id))
 					{
 						edge.line.b = new Point(cross);
 					}
 				}
-				foreach (var edge in p2.edges)
+				foreach (var edge in p2.parent.edges)
 				{
-					if (edge.getParent().Contains(p1.id))
+					if (edge.getParent().Contains(p1.parent.id))
 					{
 						edge.line.b = new Point(cross);
 					}
@@ -629,9 +567,9 @@ namespace VoronoiStruct
 				return parabolas;
 			}
 			double y = -10;
-			if (beachPolys.Count == 1)
+			if (beachParabolas.Count == 1)
 			{
-				var poly = beachPolys[0];
+				var poly = beachParabolas[0];
 				parabolas.Add(new List<PointF>());
 				double k = poly.focus.y;
 				double h = (L + poly.focus.x) / 2.0;
@@ -652,16 +590,16 @@ namespace VoronoiStruct
 					}
 				}
 			}
-			else if (beachPolys.Count > 1)
+			else if (beachParabolas.Count > 1)
 			{
-				for (int i = 0; i < beachPolys.Count - 1 && y < vmap.height + 10; i++)
+				for (int i = 0; i < beachParabolas.Count - 1 && y < vmap.height + 10; i++)
 				{
-					var poly = beachPolys[i];
+					var poly = beachParabolas[i];
 					parabolas.Add(new List<PointF>());
 					double k = poly.focus.y;
 					double h = (L + poly.focus.x) / 2.0;
 					double c = -(L - poly.focus.x) / 2.0;
-					PointF intersect = getIntersect(beachPolys[i].focus, beachPolys[i + 1].focus);
+					PointF intersect = beachParabolas[i].getIntersect(beachParabolas[i + 1], L);
 					if (c == 0)
 					{
 						for (double x = -10; x < poly.focus.x; x += interval)
@@ -679,7 +617,7 @@ namespace VoronoiStruct
 					}
 				}
 				{
-					var poly = beachPolys.Last();
+					var poly = beachParabolas.Last();
 					double k = poly.focus.y;
 					double h = (L + poly.focus.x) / 2.0;
 					double c = -(L - poly.focus.x) / 2.0;
@@ -716,57 +654,37 @@ namespace VoronoiStruct
 			return points;
 		}
 
-		private PointF getIntersect(Point A, Point B)
+		public void checkCircleEvent(int posOnBeach)
 		{
-			double ka = A.y;
-			double ha = (L + A.x) / 2.0;
-			double ca = -(L - A.x) / 2.0;
-			double kb = B.y;
-			double hb = (L + B.x) / 2.0;
-			double cb = -(L - B.x) / 2.0;
-			double a = cb - ca;
-			double b = -2 * (cb * ka - ca * kb);
-			double c = -(4 * ca * cb * (hb - ha) - cb * ka * ka + ca * kb * kb);
-			double distance = b * b - 4 * a * c;
-			if (a == 0)
+			if (posOnBeach <= 0 || posOnBeach >= beachParabolas.Count - 1)
+				return;
+			Parabola p1 = beachParabolas[posOnBeach - 1];
+			Parabola p2 = beachParabolas[posOnBeach];
+			Parabola p3 = beachParabolas[posOnBeach + 1];
+			// b to a cross c to a is smaller than zero means it's a left turn
+			if ((p2.focus.x - p1.focus.x) * (p3.focus.y - p1.focus.y) - (p3.focus.x - p1.focus.x) * (p2.focus.y - p1.focus.y) < 0)
 			{
-				if (b == 0)
+				Event circleEve = new Event(p1.parent, p2.parent, p3.parent);
+				if (circleEve.X >= L)
 				{
-					return new PointF();
+					circleEvents.Remove(p2.e);
+					p2.e = circleEve;
+					circleEvents.Add(circleEve);
 				}
-				double y = -c / b;
-				double x = Math.Pow(y - ka, 2) / (4 * ca) + ha;
-				return new PointF((float)x, (float)y);
-			}
-			else
-			{
-				double[] root = new double[2];
-				root[0] = (-b + Math.Sqrt(distance)) / (2 * a);
-				root[1] = (-b - Math.Sqrt(distance)) / (2 * a);
-				Array.Sort(root);
-				double y;
-				if (A.x < B.x)
-				{
-					y = root[0];
-				}
-				else
-				{
-					y = root[1];
-				}
-				double x = Math.Pow(y - ka, 2) / (4 * ca) + ha;
-				return new PointF((float)x, (float)y);
 			}
 		}
 	}
 
-	class Event
+	class Event : IComparable
 	{
+		// site event constructor
 		public Event(Polygon rel)
 		{
 			relevant.Add(rel);
 			X = rel.focus.x;
 			isCircle = false;
 		}
+		// circle event constructor
 		public Event(Polygon r1, Polygon r2, Polygon r3)
 		{
 			relevant.Add(r1);
@@ -810,11 +728,88 @@ namespace VoronoiStruct
 			this.X = center.X + r;
 			isCircle = true;
 		}
+		public Event(Event old)
+		{
+			this.relevant = new List<Polygon>(relevant);
+			this.X = old.X;
+			this.center = old.center;
+			this.isCircle = old.isCircle;
+		}
 
 		public List<Polygon> relevant = new List<Polygon>();
 		public double X;
 		public PointF center;
 		public bool isCircle;
+
+		public int CompareTo(object obj)
+		{
+			double val = this.X - ((Event)obj).X;
+			return Math.Sign(val) * (int)Math.Ceiling(Math.Abs(val));
+		}
+	}
+
+	class Parabola
+	{
+		public Parabola(Polygon parent)
+		{
+			this.focus = parent.focus;
+			this.parent = parent;
+		}
+		public Parabola(Parabola old, bool withEvent = true)
+		{
+			this.focus = old.focus;
+			this.parent = old.parent;
+			if (withEvent)
+			{
+				this.e = new Event(old.e);
+			}
+		}
+
+		public VoronoiStruct.Point focus;
+		public Event e;
+		public Polygon parent;
+
+		public PointF getIntersect(Parabola obj, double L)
+		{
+			double ka = this.focus.y;
+			double ha = (L + this.focus.x) / 2.0;
+			double ca = -(L - this.focus.x) / 2.0;
+			double kb = obj.focus.y;
+			double hb = (L + obj.focus.x) / 2.0;
+			double cb = -(L - obj.focus.x) / 2.0;
+			double a = cb - ca;
+			double b = -2 * (cb * ka - ca * kb);
+			double c = -(4 * ca * cb * (hb - ha) - cb * ka * ka + ca * kb * kb);
+			double distance = b * b - 4 * a * c;
+			if (a == 0)
+			{
+				if (b == 0)
+				{
+					return new PointF();
+				}
+				double y = -c / b;
+				double x = Math.Pow(y - ka, 2) / (4 * ca) + ha;
+				return new PointF((float)x, (float)y);
+			}
+			else
+			{
+				double[] root = new double[2];
+				root[0] = (-b + Math.Sqrt(distance)) / (2 * a);
+				root[1] = (-b - Math.Sqrt(distance)) / (2 * a);
+				Array.Sort(root);
+				double y;
+				if (this.focus.x < obj.focus.x)
+				{
+					y = root[0];
+				}
+				else
+				{
+					y = root[1];
+				}
+				double x = Math.Pow(y - ka, 2) / (4 * ca) + ha;
+				return new PointF((float)x, (float)y);
+			}
+		}
 	}
 
 	static class calculator
