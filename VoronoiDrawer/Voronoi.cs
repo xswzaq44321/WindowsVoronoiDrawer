@@ -351,18 +351,14 @@ namespace VoronoiStruct
 		public double nextEvent()
 		{
 			L = double.MaxValue;
-			if (siteEvents.Count + circleEvents.Count < 0)
+			if (siteEvents.Count + circleEvents.Count == 0)
 			{ // no more events to do
 				return L;
 			}
 			Event nextEvent = null;
 			nextEvent = siteEvents.Min();
-			if (nextEvent == null || nextEvent.X <= circleEvents.Min()?.X)
+			if (nextEvent == null || nextEvent.X >= circleEvents.Min()?.X)
 				nextEvent = circleEvents.Min();
-			if (nextEvent == null)
-			{
-				return L;
-			}
 			L = nextEvent.X;
 			if (!nextEvent.isCircle)
 			{
