@@ -35,6 +35,10 @@
 			this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.清除地圖ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.匯出圖檔ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.剪貼簿ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.複製jsonToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.儲存jsonToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.貼上jsonToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
 			this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
 			this.timer1 = new System.Windows.Forms.Timer(this.components);
@@ -50,7 +54,6 @@
 			this.numericUpDown_line_size = new System.Windows.Forms.NumericUpDown();
 			this.label5 = new System.Windows.Forms.Label();
 			this.button_run = new System.Windows.Forms.Button();
-			this.progressBar_frotune = new System.Windows.Forms.ProgressBar();
 			this.saveFileDialog2 = new System.Windows.Forms.SaveFileDialog();
 			this.button_perform_Lloyd = new System.Windows.Forms.Button();
 			this.label6 = new System.Windows.Forms.Label();
@@ -60,24 +63,25 @@
 			this.button_get_result_fortune = new System.Windows.Forms.Button();
 			this.button_auto_perform_fortune = new System.Windows.Forms.Button();
 			this.panel1 = new System.Windows.Forms.Panel();
-			this.剪貼簿ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.複製jsonToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.儲存jsonToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.貼上jsonToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.label7 = new System.Windows.Forms.Label();
+			this.numericUpDown_iterations = new System.Windows.Forms.NumericUpDown();
+			this.label_iterations = new System.Windows.Forms.Label();
 			((System.ComponentModel.ISupportInitialize)(this.pictureBox)).BeginInit();
 			this.menuStrip1.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.numericUpDown_timer)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.numericUpDown_point_size)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.numericUpDown_line_size)).BeginInit();
 			this.panel1.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.numericUpDown_iterations)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// pictureBox
 			// 
 			this.pictureBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.pictureBox.Location = new System.Drawing.Point(16, 38);
+			this.pictureBox.Location = new System.Drawing.Point(11, 25);
+			this.pictureBox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
 			this.pictureBox.Name = "pictureBox";
-			this.pictureBox.Size = new System.Drawing.Size(599, 599);
+			this.pictureBox.Size = new System.Drawing.Size(400, 400);
 			this.pictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
 			this.pictureBox.TabIndex = 0;
 			this.pictureBox.TabStop = false;
@@ -92,7 +96,8 @@
             this.剪貼簿ToolStripMenuItem});
 			this.menuStrip1.Location = new System.Drawing.Point(0, 0);
 			this.menuStrip1.Name = "menuStrip1";
-			this.menuStrip1.Size = new System.Drawing.Size(1260, 31);
+			this.menuStrip1.Padding = new System.Windows.Forms.Padding(4, 1, 0, 1);
+			this.menuStrip1.Size = new System.Drawing.Size(840, 24);
 			this.menuStrip1.TabIndex = 1;
 			this.menuStrip1.Text = "menuStrip1";
 			// 
@@ -103,29 +108,60 @@
             this.清除地圖ToolStripMenuItem,
             this.匯出圖檔ToolStripMenuItem});
 			this.檔案ToolStripMenuItem.Name = "檔案ToolStripMenuItem";
-			this.檔案ToolStripMenuItem.Size = new System.Drawing.Size(58, 27);
+			this.檔案ToolStripMenuItem.Size = new System.Drawing.Size(43, 22);
 			this.檔案ToolStripMenuItem.Text = "檔案";
 			// 
 			// openToolStripMenuItem
 			// 
 			this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-			this.openToolStripMenuItem.Size = new System.Drawing.Size(210, 30);
+			this.openToolStripMenuItem.Size = new System.Drawing.Size(122, 22);
 			this.openToolStripMenuItem.Text = "開啟地圖";
 			this.openToolStripMenuItem.Click += new System.EventHandler(this.開啟ToolStripMenuItem_Click);
 			// 
 			// 清除地圖ToolStripMenuItem
 			// 
 			this.清除地圖ToolStripMenuItem.Name = "清除地圖ToolStripMenuItem";
-			this.清除地圖ToolStripMenuItem.Size = new System.Drawing.Size(210, 30);
+			this.清除地圖ToolStripMenuItem.Size = new System.Drawing.Size(122, 22);
 			this.清除地圖ToolStripMenuItem.Text = "清除地圖";
 			this.清除地圖ToolStripMenuItem.Click += new System.EventHandler(this.清除地圖ToolStripMenuItem_Click);
 			// 
 			// 匯出圖檔ToolStripMenuItem
 			// 
 			this.匯出圖檔ToolStripMenuItem.Name = "匯出圖檔ToolStripMenuItem";
-			this.匯出圖檔ToolStripMenuItem.Size = new System.Drawing.Size(210, 30);
+			this.匯出圖檔ToolStripMenuItem.Size = new System.Drawing.Size(122, 22);
 			this.匯出圖檔ToolStripMenuItem.Text = "匯出圖檔";
 			this.匯出圖檔ToolStripMenuItem.Click += new System.EventHandler(this.匯出圖檔ToolStripMenuItem_Click);
+			// 
+			// 剪貼簿ToolStripMenuItem
+			// 
+			this.剪貼簿ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.複製jsonToolStripMenuItem,
+            this.儲存jsonToolStripMenuItem,
+            this.貼上jsonToolStripMenuItem});
+			this.剪貼簿ToolStripMenuItem.Name = "剪貼簿ToolStripMenuItem";
+			this.剪貼簿ToolStripMenuItem.Size = new System.Drawing.Size(55, 22);
+			this.剪貼簿ToolStripMenuItem.Text = "剪貼簿";
+			// 
+			// 複製jsonToolStripMenuItem
+			// 
+			this.複製jsonToolStripMenuItem.Name = "複製jsonToolStripMenuItem";
+			this.複製jsonToolStripMenuItem.Size = new System.Drawing.Size(121, 22);
+			this.複製jsonToolStripMenuItem.Text = "複製json";
+			this.複製jsonToolStripMenuItem.Click += new System.EventHandler(this.複製jsonToolStripMenuItem_Click);
+			// 
+			// 儲存jsonToolStripMenuItem
+			// 
+			this.儲存jsonToolStripMenuItem.Name = "儲存jsonToolStripMenuItem";
+			this.儲存jsonToolStripMenuItem.Size = new System.Drawing.Size(121, 22);
+			this.儲存jsonToolStripMenuItem.Text = "儲存json";
+			this.儲存jsonToolStripMenuItem.Click += new System.EventHandler(this.儲存jsonToolStripMenuItem_Click);
+			// 
+			// 貼上jsonToolStripMenuItem
+			// 
+			this.貼上jsonToolStripMenuItem.Name = "貼上jsonToolStripMenuItem";
+			this.貼上jsonToolStripMenuItem.Size = new System.Drawing.Size(121, 22);
+			this.貼上jsonToolStripMenuItem.Text = "貼上json";
+			this.貼上jsonToolStripMenuItem.Click += new System.EventHandler(this.貼上jsonToolStripMenuItem_Click);
 			// 
 			// openFileDialog1
 			// 
@@ -144,20 +180,18 @@
 			// 
 			this.label4.AutoSize = true;
 			this.label4.Font = new System.Drawing.Font("微軟正黑體", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-			this.label4.Location = new System.Drawing.Point(4, 222);
-			this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+			this.label4.Location = new System.Drawing.Point(3, 148);
 			this.label4.Name = "label4";
-			this.label4.Size = new System.Drawing.Size(246, 31);
+			this.label4.Size = new System.Drawing.Size(163, 21);
 			this.label4.TabIndex = 24;
 			this.label4.Text = "Fortune\'s Algorithm";
 			// 
 			// button_pause_fortune
 			// 
 			this.button_pause_fortune.Font = new System.Drawing.Font("微軟正黑體", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-			this.button_pause_fortune.Location = new System.Drawing.Point(322, 338);
-			this.button_pause_fortune.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+			this.button_pause_fortune.Location = new System.Drawing.Point(215, 225);
 			this.button_pause_fortune.Name = "button_pause_fortune";
-			this.button_pause_fortune.Size = new System.Drawing.Size(150, 46);
+			this.button_pause_fortune.Size = new System.Drawing.Size(100, 31);
 			this.button_pause_fortune.TabIndex = 23;
 			this.button_pause_fortune.Text = "Pause";
 			this.button_pause_fortune.UseVisualStyleBackColor = true;
@@ -169,10 +203,9 @@
 			this.checkBox_circle_fortune.Checked = true;
 			this.checkBox_circle_fortune.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.checkBox_circle_fortune.Font = new System.Drawing.Font("微軟正黑體", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-			this.checkBox_circle_fortune.Location = new System.Drawing.Point(4, 258);
-			this.checkBox_circle_fortune.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+			this.checkBox_circle_fortune.Location = new System.Drawing.Point(3, 172);
 			this.checkBox_circle_fortune.Name = "checkBox_circle_fortune";
-			this.checkBox_circle_fortune.Size = new System.Drawing.Size(92, 27);
+			this.checkBox_circle_fortune.Size = new System.Drawing.Size(63, 20);
 			this.checkBox_circle_fortune.TabIndex = 22;
 			this.checkBox_circle_fortune.Text = "Circles";
 			this.checkBox_circle_fortune.UseVisualStyleBackColor = true;
@@ -180,10 +213,9 @@
 			// button_perform_fortune
 			// 
 			this.button_perform_fortune.Font = new System.Drawing.Font("微軟正黑體", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-			this.button_perform_fortune.Location = new System.Drawing.Point(4, 338);
-			this.button_perform_fortune.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+			this.button_perform_fortune.Location = new System.Drawing.Point(3, 225);
 			this.button_perform_fortune.Name = "button_perform_fortune";
-			this.button_perform_fortune.Size = new System.Drawing.Size(150, 46);
+			this.button_perform_fortune.Size = new System.Drawing.Size(100, 31);
 			this.button_perform_fortune.TabIndex = 21;
 			this.button_perform_fortune.Text = "Perform step";
 			this.button_perform_fortune.UseVisualStyleBackColor = true;
@@ -193,17 +225,15 @@
 			// 
 			this.label1.AutoSize = true;
 			this.label1.Font = new System.Drawing.Font("微軟正黑體", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-			this.label1.Location = new System.Drawing.Point(4, 0);
-			this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+			this.label1.Location = new System.Drawing.Point(3, 0);
 			this.label1.Name = "label1";
-			this.label1.Size = new System.Drawing.Size(126, 31);
+			this.label1.Size = new System.Drawing.Size(83, 21);
 			this.label1.TabIndex = 15;
 			this.label1.Text = "point size";
 			// 
 			// numericUpDown_timer
 			// 
-			this.numericUpDown_timer.Location = new System.Drawing.Point(10, 183);
-			this.numericUpDown_timer.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+			this.numericUpDown_timer.Location = new System.Drawing.Point(7, 122);
 			this.numericUpDown_timer.Maximum = new decimal(new int[] {
             1000,
             0,
@@ -215,7 +245,7 @@
             0,
             0});
 			this.numericUpDown_timer.Name = "numericUpDown_timer";
-			this.numericUpDown_timer.Size = new System.Drawing.Size(180, 29);
+			this.numericUpDown_timer.Size = new System.Drawing.Size(120, 22);
 			this.numericUpDown_timer.TabIndex = 20;
 			this.numericUpDown_timer.Value = new decimal(new int[] {
             10,
@@ -226,15 +256,14 @@
 			// 
 			// numericUpDown_point_size
 			// 
-			this.numericUpDown_point_size.Location = new System.Drawing.Point(10, 36);
-			this.numericUpDown_point_size.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+			this.numericUpDown_point_size.Location = new System.Drawing.Point(7, 24);
 			this.numericUpDown_point_size.Minimum = new decimal(new int[] {
             2,
             0,
             0,
             0});
 			this.numericUpDown_point_size.Name = "numericUpDown_point_size";
-			this.numericUpDown_point_size.Size = new System.Drawing.Size(180, 29);
+			this.numericUpDown_point_size.Size = new System.Drawing.Size(120, 22);
 			this.numericUpDown_point_size.TabIndex = 16;
 			this.numericUpDown_point_size.Value = new decimal(new int[] {
             5,
@@ -247,10 +276,9 @@
 			// 
 			this.label3.AutoSize = true;
 			this.label3.Font = new System.Drawing.Font("微軟正黑體", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-			this.label3.Location = new System.Drawing.Point(4, 147);
-			this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+			this.label3.Location = new System.Drawing.Point(3, 98);
 			this.label3.Name = "label3";
-			this.label3.Size = new System.Drawing.Size(169, 31);
+			this.label3.Size = new System.Drawing.Size(111, 21);
 			this.label3.TabIndex = 19;
 			this.label3.Text = "timer interval";
 			// 
@@ -258,24 +286,22 @@
 			// 
 			this.label2.AutoSize = true;
 			this.label2.Font = new System.Drawing.Font("微軟正黑體", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-			this.label2.Location = new System.Drawing.Point(4, 74);
-			this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+			this.label2.Location = new System.Drawing.Point(3, 49);
 			this.label2.Name = "label2";
-			this.label2.Size = new System.Drawing.Size(107, 31);
+			this.label2.Size = new System.Drawing.Size(70, 21);
 			this.label2.TabIndex = 17;
 			this.label2.Text = "line size";
 			// 
 			// numericUpDown_line_size
 			// 
-			this.numericUpDown_line_size.Location = new System.Drawing.Point(10, 110);
-			this.numericUpDown_line_size.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+			this.numericUpDown_line_size.Location = new System.Drawing.Point(7, 73);
 			this.numericUpDown_line_size.Minimum = new decimal(new int[] {
             1,
             0,
             0,
             0});
 			this.numericUpDown_line_size.Name = "numericUpDown_line_size";
-			this.numericUpDown_line_size.Size = new System.Drawing.Size(180, 29);
+			this.numericUpDown_line_size.Size = new System.Drawing.Size(120, 22);
 			this.numericUpDown_line_size.TabIndex = 18;
 			this.numericUpDown_line_size.Value = new decimal(new int[] {
             2,
@@ -288,32 +314,22 @@
 			// 
 			this.label5.AutoSize = true;
 			this.label5.Font = new System.Drawing.Font("微軟正黑體", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-			this.label5.Location = new System.Drawing.Point(4, 516);
-			this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+			this.label5.Location = new System.Drawing.Point(3, 344);
 			this.label5.Name = "label5";
-			this.label5.Size = new System.Drawing.Size(175, 31);
+			this.label5.Size = new System.Drawing.Size(117, 21);
 			this.label5.TabIndex = 27;
 			this.label5.Text = "Just get result";
 			// 
 			// button_run
 			// 
 			this.button_run.Font = new System.Drawing.Font("微軟正黑體", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-			this.button_run.Location = new System.Drawing.Point(4, 552);
-			this.button_run.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+			this.button_run.Location = new System.Drawing.Point(3, 368);
 			this.button_run.Name = "button_run";
-			this.button_run.Size = new System.Drawing.Size(180, 46);
+			this.button_run.Size = new System.Drawing.Size(120, 31);
 			this.button_run.TabIndex = 28;
 			this.button_run.Text = "Run";
 			this.button_run.UseVisualStyleBackColor = true;
-			// 
-			// progressBar_frotune
-			// 
-			this.progressBar_frotune.Location = new System.Drawing.Point(194, 552);
-			this.progressBar_frotune.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-			this.progressBar_frotune.Name = "progressBar_frotune";
-			this.progressBar_frotune.Size = new System.Drawing.Size(438, 46);
-			this.progressBar_frotune.Step = 1;
-			this.progressBar_frotune.TabIndex = 29;
+			this.button_run.Click += new System.EventHandler(this.button_run_Click);
 			// 
 			// saveFileDialog2
 			// 
@@ -322,23 +338,21 @@
 			// button_perform_Lloyd
 			// 
 			this.button_perform_Lloyd.Font = new System.Drawing.Font("微軟正黑體", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-			this.button_perform_Lloyd.Location = new System.Drawing.Point(4, 440);
-			this.button_perform_Lloyd.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+			this.button_perform_Lloyd.Location = new System.Drawing.Point(3, 293);
 			this.button_perform_Lloyd.Name = "button_perform_Lloyd";
-			this.button_perform_Lloyd.Size = new System.Drawing.Size(180, 46);
+			this.button_perform_Lloyd.Size = new System.Drawing.Size(120, 31);
 			this.button_perform_Lloyd.TabIndex = 30;
 			this.button_perform_Lloyd.Text = "Get result";
 			this.button_perform_Lloyd.UseVisualStyleBackColor = true;
-			this.button_perform_Lloyd.Click += new System.EventHandler(this.button_perform_Lloyd_Click_1);
+			this.button_perform_Lloyd.Click += new System.EventHandler(this.button_perform_Lloyd_Click);
 			// 
 			// label6
 			// 
 			this.label6.AutoSize = true;
 			this.label6.Font = new System.Drawing.Font("微軟正黑體", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-			this.label6.Location = new System.Drawing.Point(4, 404);
-			this.label6.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+			this.label6.Location = new System.Drawing.Point(3, 269);
 			this.label6.Name = "label6";
-			this.label6.Size = new System.Drawing.Size(220, 31);
+			this.label6.Size = new System.Drawing.Size(144, 21);
 			this.label6.TabIndex = 31;
 			this.label6.Text = "Lloyd\'s Algorithm";
 			// 
@@ -348,10 +362,9 @@
 			this.checkBox_beachLine_fortune.Checked = true;
 			this.checkBox_beachLine_fortune.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.checkBox_beachLine_fortune.Font = new System.Drawing.Font("微軟正黑體", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-			this.checkBox_beachLine_fortune.Location = new System.Drawing.Point(250, 258);
-			this.checkBox_beachLine_fortune.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+			this.checkBox_beachLine_fortune.Location = new System.Drawing.Point(167, 172);
 			this.checkBox_beachLine_fortune.Name = "checkBox_beachLine_fortune";
-			this.checkBox_beachLine_fortune.Size = new System.Drawing.Size(122, 27);
+			this.checkBox_beachLine_fortune.Size = new System.Drawing.Size(84, 20);
 			this.checkBox_beachLine_fortune.TabIndex = 32;
 			this.checkBox_beachLine_fortune.Text = "BeachLine";
 			this.checkBox_beachLine_fortune.UseVisualStyleBackColor = true;
@@ -362,10 +375,9 @@
 			this.checkBox_voronoi_diagram_fortune.Checked = true;
 			this.checkBox_voronoi_diagram_fortune.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.checkBox_voronoi_diagram_fortune.Font = new System.Drawing.Font("微軟正黑體", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-			this.checkBox_voronoi_diagram_fortune.Location = new System.Drawing.Point(250, 298);
-			this.checkBox_voronoi_diagram_fortune.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+			this.checkBox_voronoi_diagram_fortune.Location = new System.Drawing.Point(167, 199);
 			this.checkBox_voronoi_diagram_fortune.Name = "checkBox_voronoi_diagram_fortune";
-			this.checkBox_voronoi_diagram_fortune.Size = new System.Drawing.Size(183, 27);
+			this.checkBox_voronoi_diagram_fortune.Size = new System.Drawing.Size(125, 20);
 			this.checkBox_voronoi_diagram_fortune.TabIndex = 33;
 			this.checkBox_voronoi_diagram_fortune.Text = "Voronoi Diagram";
 			this.checkBox_voronoi_diagram_fortune.UseVisualStyleBackColor = true;
@@ -376,10 +388,9 @@
 			this.checkBox_delaunay_triangulation_fortune.Checked = true;
 			this.checkBox_delaunay_triangulation_fortune.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.checkBox_delaunay_triangulation_fortune.Font = new System.Drawing.Font("微軟正黑體", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-			this.checkBox_delaunay_triangulation_fortune.Location = new System.Drawing.Point(4, 298);
-			this.checkBox_delaunay_triangulation_fortune.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+			this.checkBox_delaunay_triangulation_fortune.Location = new System.Drawing.Point(3, 199);
 			this.checkBox_delaunay_triangulation_fortune.Name = "checkBox_delaunay_triangulation_fortune";
-			this.checkBox_delaunay_triangulation_fortune.Size = new System.Drawing.Size(235, 27);
+			this.checkBox_delaunay_triangulation_fortune.Size = new System.Drawing.Size(158, 20);
 			this.checkBox_delaunay_triangulation_fortune.TabIndex = 34;
 			this.checkBox_delaunay_triangulation_fortune.Text = "Delaunay Triangulation";
 			this.checkBox_delaunay_triangulation_fortune.UseVisualStyleBackColor = true;
@@ -387,10 +398,9 @@
 			// button_get_result_fortune
 			// 
 			this.button_get_result_fortune.Font = new System.Drawing.Font("微軟正黑體", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-			this.button_get_result_fortune.Location = new System.Drawing.Point(482, 338);
-			this.button_get_result_fortune.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+			this.button_get_result_fortune.Location = new System.Drawing.Point(321, 225);
 			this.button_get_result_fortune.Name = "button_get_result_fortune";
-			this.button_get_result_fortune.Size = new System.Drawing.Size(150, 46);
+			this.button_get_result_fortune.Size = new System.Drawing.Size(100, 31);
 			this.button_get_result_fortune.TabIndex = 35;
 			this.button_get_result_fortune.Text = "Get result";
 			this.button_get_result_fortune.UseVisualStyleBackColor = true;
@@ -399,10 +409,9 @@
 			// button_auto_perform_fortune
 			// 
 			this.button_auto_perform_fortune.Font = new System.Drawing.Font("微軟正黑體", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-			this.button_auto_perform_fortune.Location = new System.Drawing.Point(164, 338);
-			this.button_auto_perform_fortune.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+			this.button_auto_perform_fortune.Location = new System.Drawing.Point(109, 225);
 			this.button_auto_perform_fortune.Name = "button_auto_perform_fortune";
-			this.button_auto_perform_fortune.Size = new System.Drawing.Size(150, 46);
+			this.button_auto_perform_fortune.Size = new System.Drawing.Size(100, 31);
 			this.button_auto_perform_fortune.TabIndex = 36;
 			this.button_auto_perform_fortune.Text = "Auto perform";
 			this.button_auto_perform_fortune.UseVisualStyleBackColor = true;
@@ -410,6 +419,9 @@
 			// 
 			// panel1
 			// 
+			this.panel1.Controls.Add(this.label_iterations);
+			this.panel1.Controls.Add(this.label7);
+			this.panel1.Controls.Add(this.numericUpDown_iterations);
 			this.panel1.Controls.Add(this.label1);
 			this.panel1.Controls.Add(this.button_auto_perform_fortune);
 			this.panel1.Controls.Add(this.numericUpDown_line_size);
@@ -425,57 +437,52 @@
 			this.panel1.Controls.Add(this.button_perform_fortune);
 			this.panel1.Controls.Add(this.button_perform_Lloyd);
 			this.panel1.Controls.Add(this.checkBox_circle_fortune);
-			this.panel1.Controls.Add(this.progressBar_frotune);
 			this.panel1.Controls.Add(this.button_pause_fortune);
 			this.panel1.Controls.Add(this.button_run);
 			this.panel1.Controls.Add(this.label4);
 			this.panel1.Controls.Add(this.label5);
-			this.panel1.Location = new System.Drawing.Point(624, 38);
-			this.panel1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+			this.panel1.Location = new System.Drawing.Point(416, 25);
 			this.panel1.Name = "panel1";
-			this.panel1.Size = new System.Drawing.Size(636, 616);
+			this.panel1.Size = new System.Drawing.Size(424, 411);
 			this.panel1.TabIndex = 37;
 			// 
-			// 剪貼簿ToolStripMenuItem
+			// label7
 			// 
-			this.剪貼簿ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.複製jsonToolStripMenuItem,
-            this.儲存jsonToolStripMenuItem,
-            this.貼上jsonToolStripMenuItem});
-			this.剪貼簿ToolStripMenuItem.Name = "剪貼簿ToolStripMenuItem";
-			this.剪貼簿ToolStripMenuItem.Size = new System.Drawing.Size(76, 27);
-			this.剪貼簿ToolStripMenuItem.Text = "剪貼簿";
+			this.label7.AutoSize = true;
+			this.label7.Font = new System.Drawing.Font("微軟正黑體", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+			this.label7.Location = new System.Drawing.Point(140, 98);
+			this.label7.Name = "label7";
+			this.label7.Size = new System.Drawing.Size(136, 21);
+			this.label7.TabIndex = 37;
+			this.label7.Text = "result Iteratrions";
 			// 
-			// 複製jsonToolStripMenuItem
+			// numericUpDown_iterations
 			// 
-			this.複製jsonToolStripMenuItem.Name = "複製jsonToolStripMenuItem";
-			this.複製jsonToolStripMenuItem.Size = new System.Drawing.Size(210, 30);
-			this.複製jsonToolStripMenuItem.Text = "複製json";
-			this.複製jsonToolStripMenuItem.Click += new System.EventHandler(this.複製jsonToolStripMenuItem_Click);
+			this.numericUpDown_iterations.Location = new System.Drawing.Point(144, 122);
+			this.numericUpDown_iterations.Name = "numericUpDown_iterations";
+			this.numericUpDown_iterations.Size = new System.Drawing.Size(120, 22);
+			this.numericUpDown_iterations.TabIndex = 38;
 			// 
-			// 儲存jsonToolStripMenuItem
+			// label_iterations
 			// 
-			this.儲存jsonToolStripMenuItem.Name = "儲存jsonToolStripMenuItem";
-			this.儲存jsonToolStripMenuItem.Size = new System.Drawing.Size(210, 30);
-			this.儲存jsonToolStripMenuItem.Text = "儲存json";
-			this.儲存jsonToolStripMenuItem.Click += new System.EventHandler(this.儲存jsonToolStripMenuItem_Click);
-			// 
-			// 貼上jsonToolStripMenuItem
-			// 
-			this.貼上jsonToolStripMenuItem.Name = "貼上jsonToolStripMenuItem";
-			this.貼上jsonToolStripMenuItem.Size = new System.Drawing.Size(210, 30);
-			this.貼上jsonToolStripMenuItem.Text = "貼上json";
-			this.貼上jsonToolStripMenuItem.Click += new System.EventHandler(this.貼上jsonToolStripMenuItem_Click);
+			this.label_iterations.AutoSize = true;
+			this.label_iterations.Font = new System.Drawing.Font("微軟正黑體", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+			this.label_iterations.Location = new System.Drawing.Point(129, 372);
+			this.label_iterations.Name = "label_iterations";
+			this.label_iterations.Size = new System.Drawing.Size(119, 21);
+			this.label_iterations.TabIndex = 39;
+			this.label_iterations.Text = "n-th iterations";
 			// 
 			// Form1
 			// 
-			this.AutoScaleDimensions = new System.Drawing.SizeF(144F, 144F);
+			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-			this.ClientSize = new System.Drawing.Size(1260, 656);
+			this.ClientSize = new System.Drawing.Size(840, 437);
 			this.Controls.Add(this.panel1);
 			this.Controls.Add(this.pictureBox);
 			this.Controls.Add(this.menuStrip1);
 			this.MainMenuStrip = this.menuStrip1;
+			this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
 			this.Name = "Form1";
 			this.Text = "Voronoi Drawer";
 			this.Resize += new System.EventHandler(this.Form1_Resize);
@@ -487,6 +494,7 @@
 			((System.ComponentModel.ISupportInitialize)(this.numericUpDown_line_size)).EndInit();
 			this.panel1.ResumeLayout(false);
 			this.panel1.PerformLayout();
+			((System.ComponentModel.ISupportInitialize)(this.numericUpDown_iterations)).EndInit();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -515,7 +523,6 @@
 		private System.Windows.Forms.NumericUpDown numericUpDown_line_size;
 		private System.Windows.Forms.Label label5;
 		private System.Windows.Forms.Button button_run;
-		private System.Windows.Forms.ProgressBar progressBar_frotune;
 		private System.Windows.Forms.SaveFileDialog saveFileDialog2;
 		private System.Windows.Forms.Button button_perform_Lloyd;
 		private System.Windows.Forms.Label label6;
@@ -529,6 +536,9 @@
 		private System.Windows.Forms.ToolStripMenuItem 複製jsonToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem 儲存jsonToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem 貼上jsonToolStripMenuItem;
+		private System.Windows.Forms.Label label7;
+		private System.Windows.Forms.NumericUpDown numericUpDown_iterations;
+		private System.Windows.Forms.Label label_iterations;
 	}
 }
 

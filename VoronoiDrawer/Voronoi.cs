@@ -78,7 +78,6 @@ namespace VoronoiStruct
 				double mx = edge.line.b.x - edge.line.a.x;
 				double my = edge.line.b.y - edge.line.a.y;
 				double y0 = 0, ym = 0;
-				bool xout = false, yout = false;
 				if (mx != 0)
 				{
 					y0 = edge.line.a.y + (0 - edge.line.a.x) * (my / mx);
@@ -209,7 +208,7 @@ namespace VoronoiStruct
 				edgeDegrees[i] = degree;
 
 				// sort a, b
-				if(degree < -Math.PI / 2 || degree > Math.PI / 2)
+				if (degree < -Math.PI / 2 || degree > Math.PI / 2)
 				{ // angle of edge is behind focus
 					if (ta < 0 && tb > 0)
 						ta += 2 * Math.PI;
@@ -256,7 +255,7 @@ namespace VoronoiStruct
 		}
 
 		public Line line;
-		private int[] parentID;
+		public int[] parentID;
 		private bool is_abstract;
 
 		public int[] getParent()
@@ -332,10 +331,6 @@ namespace VoronoiStruct
 			{
 				var bar = this.vmap.polygons[i];
 				bar.id = i;
-				if (i < vmap.polygons.Count - 1 && vmap.polygons[i].focus.x == vmap.polygons[i + 1].focus.x)
-				{
-					bar.focus.x++; 
-				}
 				addSite(new Event(bar));
 			}
 		}
@@ -355,24 +350,16 @@ namespace VoronoiStruct
 		// moving forward swppeLine and deal with events
 		public double nextEvent()
 		{
-			if (siteEvents.Count + circleEvents.Count < 0)
-			{
-				return double.MaxValue;
-			}
 			L = double.MaxValue;
-			Event nextEvent = null;
-			foreach (var e in siteEvents.Union(circleEvents))
-			{
-				if (e.X < L)
-				{
-					L = e.X;
-					nextEvent = e;
-				}
-			}
-			if (nextEvent == null)
+			if (siteEvents.Count + circleEvents.Count == 0)
 			{
 				return L;
 			}
+			Event nextEvent = null;
+			nextEvent = siteEvents.Min();
+			if (nextEvent == null || nextEvent.X >= circleEvents.Min()?.X)
+				nextEvent = circleEvents.Min();
+			L = nextEvent.X;
 			if (!nextEvent.isCircle)
 			{
 				beachAdd(nextEvent.relevant[0]);
@@ -473,6 +460,36 @@ namespace VoronoiStruct
 				return;
 			}
 			pj = beachPolys[pos];
+			if (pj.focus.x == pi.focus.x)
+			{
+				// special case, first few point on same x pos
+				if (pj.focus.y > pi.focus.y)
+					beachPolys.Insert(pos, pi);
+				else
+					beachPolys.Insert(pos + 1, pi);
+				var bar = new Edge(pi.id, pj.id);
+				bar.line.a = new VoronoiStruct.Point(-vmap.width, (pj.focus.y + pi.focus.y) / 2);
+				pj.edges.Add(new Edge(bar));
+				pi.edges.Add(new Edge(bar));
+				return;
+			}
+			else if (beachPolys.Count == 2)
+			{ // special case, on third point insertion if first two point is on same x pos
+				if (pi.focus.y < beachPolys[0].focus.y)
+					pos = 0;
+				else if (pi.focus.y > beachPolys[0].focus.y && pi.focus.y < beachPolys[1].focus.y)
+					if(pi.focus.y >= getIntersect(beachPolys[0].focus, beachPolys[1].focus).Y)
+					{
+						pos = 1;
+					}
+					else
+					{
+						pos = 0;
+					}
+				else if (pi.focus.y > beachPolys[1].focus.y)
+					pos = 1;
+				pj = beachPolys[pos];
+			}
 			Polygon pj_l = null;
 			Polygon pj_r = null;
 			if (pos - 1 >= 0)
@@ -485,8 +502,8 @@ namespace VoronoiStruct
 			pos = pos + 1;
 
 			// add to edges
-			vmap.polygons[pi.id].edges.Add(new Edge(pi.id, pj.id, true));
-			vmap.polygons[pj.id].edges.Add(new Edge(pi.id, pj.id, true));
+			pi.edges.Add(new Edge(pi.id, pj.id, true));
+			pj.edges.Add(new Edge(pi.id, pj.id, true));
 
 			// remove old triple involving pj
 			circleEvents.RemoveAll((e) =>
@@ -732,7 +749,7 @@ namespace VoronoiStruct
 			{
 				if (b == 0)
 				{
-					return new PointF();
+					return new PointF(float.MinValue, (A.y + B.y) / 2);
 				}
 				double y = -c / b;
 				double x = Math.Pow(y - ka, 2) / (4 * ca) + ha;
@@ -759,7 +776,7 @@ namespace VoronoiStruct
 		}
 	}
 
-	class Event
+	class Event: IComparable
 	{
 		public Event(Polygon rel)
 		{
@@ -815,6 +832,16 @@ namespace VoronoiStruct
 		public double X;
 		public PointF center;
 		public bool isCircle;
+
+		public int CompareTo(object obj)
+		{
+			if (this.X < ((Event)obj).X)
+				return -1;
+			else if (this.X == ((Event)obj).X)
+				return 0;
+			else
+				return 1;
+		}
 	}
 
 	static class calculator

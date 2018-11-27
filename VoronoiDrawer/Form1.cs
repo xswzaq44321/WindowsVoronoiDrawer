@@ -38,6 +38,7 @@ namespace VoronoiDrawer
 		Size circleSize;
 		VoronoiStruct.Voronoi vmap;
 		VoronoiStruct.SweepLine sweepLine;
+		int mapIterations;
 
 		void readMap(string filePath, out VoronoiStruct.Voronoi vmap)
 		{
@@ -59,6 +60,8 @@ namespace VoronoiDrawer
 			}
 			vmap = map;
 			sweepLine = null;
+			mapIterations = 0;
+			label_iterations.Text = string.Format("{0}-th iterations", mapIterations);
 		}
 
 		void drawPoint(Brush brush, VoronoiStruct.Point pos)
@@ -104,8 +107,8 @@ namespace VoronoiDrawer
 			{
 				foreach (var edge in poly.edges)
 				{
-					if (!edge.isAbstract() && 
-						(edge.line.a.x != -1 || edge.line.a.y != -1) && 
+					if (!edge.isAbstract() &&
+						(edge.line.a.x != -1 || edge.line.a.y != -1) &&
 						(edge.line.b.x != -1 || edge.line.b.y != -1))
 					{
 						drawLine(blackPen, edge.line);
@@ -138,6 +141,8 @@ namespace VoronoiDrawer
 			vmap = newMap;
 			sweepLine = null;
 			drawVoronoi(vmap);
+			++mapIterations;
+			label_iterations.Text = string.Format("{0}-th iterations", mapIterations);
 		}
 
 		bool onEdge(VoronoiStruct.Edge o)
@@ -310,7 +315,18 @@ namespace VoronoiDrawer
 			drawVoronoi(vmap);
 		}
 
-		private void button_perform_Lloyd_Click_1(object sender, EventArgs e)
+		private void button_run_Click(object sender, EventArgs e)
+		{
+			if (vmap.polygons[0].edges.Count == 0)
+				button_get_result_fortune_Click(null, null);
+			for (int i = 0; i < numericUpDown_iterations.Value; i++)
+			{
+				button_perform_Lloyd_Click(null, null);
+				button_get_result_fortune_Click(null, null);
+			}
+		}
+
+		private void button_perform_Lloyd_Click(object sender, EventArgs e)
 		{
 			performLloyd();
 		}
@@ -330,23 +346,16 @@ namespace VoronoiDrawer
 
 		private void button_auto_perform_fortune_Click(object sender, EventArgs e)
 		{
-			if (vmap == null)
-				return;
-			if (sweepLine == null)
-				sweepLine = new VoronoiStruct.SweepLine(ref vmap);
 			timer1.Start();
 		}
 
 		private void timer1_Tick(object sender, EventArgs e)
 		{
-			double L = sweepLine.nextEvent();
-			if (L == double.MaxValue)
+			button_perform_fortune_Click(null, null);
+			if (sweepLine.L == double.MaxValue)
 			{
-				sweepLine.finishEdges();
 				timer1.Stop();
 			}
-			drawVoronoi(vmap);
-			drawCurrentStep();
 		}
 	}
 }
