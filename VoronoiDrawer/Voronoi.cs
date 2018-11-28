@@ -478,7 +478,7 @@ namespace VoronoiStruct
 				if (pi.focus.y < beachPolys[0].focus.y)
 					pos = 0;
 				else if (pi.focus.y > beachPolys[0].focus.y && pi.focus.y < beachPolys[1].focus.y)
-					if(pi.focus.y >= getIntersect(beachPolys[0].focus, beachPolys[1].focus).Y)
+					if (pi.focus.y >= getIntersect(beachPolys[0].focus, beachPolys[1].focus).Y)
 					{
 						pos = 1;
 					}
@@ -776,7 +776,7 @@ namespace VoronoiStruct
 		}
 	}
 
-	class Event: IComparable
+	class Event : IComparable
 	{
 		public Event(Polygon rel)
 		{
@@ -823,7 +823,9 @@ namespace VoronoiStruct
 			double DY = calculator.det(Y);
 			double DD = calculator.det(D);
 			center = new PointF((float)(DX / (2 * DD)), (float)(DY / (2 * DD)));
-			double r = calculator.distance(r1.focus, center);
+			// find max radius to avoid errors
+			double r = Math.Max(calculator.distance(r1.focus, center), calculator.distance(r2.focus, center));
+			r = Math.Max(r, calculator.distance(r3.focus, center));
 			this.X = center.X + r;
 			isCircle = true;
 		}
