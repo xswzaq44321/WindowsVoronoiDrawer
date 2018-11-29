@@ -64,15 +64,15 @@ namespace VoronoiStruct
 			for (int i = 0; i < edges.Count; i++)
 			{
 				var edge = edges[i];
-				if (regin.Contains(edge.line.a.x, edge.line.a.y) && regin.Contains(edge.line.b.x, edge.line.b.y))
-				{
-					continue;
-				}
-				if (!calculator.intersect(regin, edge.line))
+				if (!regin.Contains(edge.line.a.x, edge.line.a.y) && !regin.Contains(edge.line.b.x, edge.line.b.y))
 				{
 					// edge is out of regin
 					edges.Remove(edge);
 					--i;
+					continue;
+				}
+				if (regin.Contains(edge.line.a.x, edge.line.a.y) && regin.Contains(edge.line.b.x, edge.line.b.y))
+				{
 					continue;
 				}
 				double mx = edge.line.b.x - edge.line.a.x;
@@ -635,7 +635,6 @@ namespace VoronoiStruct
 					}
 				}
 			}
-			L = double.MaxValue;
 		}
 
 		// get points for drawing purpose
@@ -863,53 +862,6 @@ namespace VoronoiStruct
 		public static double distance(PointF a, PointF b)
 		{
 			return Math.Sqrt(Math.Pow(a.X - b.X, 2) + Math.Pow(a.Y - b.Y, 2));
-		}
-
-		// 向量oa與向量ob進行叉積，判斷oa到ob的旋轉方向。
-		public static double cross(Point o, Point a, Point b)
-		{
-			return (double)(a.x - o.x) * (b.y - o.y) - (double)(a.y - o.y) * (b.x - o.x);
-		}
-
-		// 點與線段已確定共線，判斷相交。
-		public static bool intersect(Point p1, Point p2, Point p)
-		{
-			return p.x >= Math.Min(p1.x, p2.x)
-				&& p.x <= Math.Max(p1.x, p2.x)
-				&& p.y >= Math.Min(p1.y, p2.y)
-				&& p.y <= Math.Max(p1.y, p2.y);
-		}
-
-		public static bool intersect(Point a1, Point a2, Point b1, Point b2)
-		{
-			double c1 = cross(a1, a2, b1);
-			double c2 = cross(a1, a2, b2);
-			double c3 = cross(b1, b2, a1);
-			double c4 = cross(b1, b2, a2);
-
-			// 端點不共線
-			if (c1 * c2 < 0 && c3 * c4 < 0) return true;
-			// 端點共線
-			if (c1 == 0 && intersect(a1, a2, b1)) return true;
-			if (c2 == 0 && intersect(a1, a2, b2)) return true;
-			if (c3 == 0 && intersect(b1, b2, a1)) return true;
-			if (c4 == 0 && intersect(b1, b2, a2)) return true;
-			return false;
-		}
-
-		public static bool intersect(Line a, Line b)
-		{
-			return intersect(a.a, a.b, b.a, b.b);
-		}
-
-		public static bool intersect(Rectangle regin, Line line)
-		{
-			Line top = new Line(regin.Left, regin.Top, regin.Right, regin.Top);
-			Line bottom = new Line(regin.Left, regin.Bottom, regin.Right, regin.Bottom);
-			Line left = new Line(regin.Left, regin.Top, regin.Left, regin.Bottom);
-			Line right = new Line(regin.Right, regin.Top, regin.Right, regin.Bottom);
-			return intersect(top, line) || intersect(bottom, line) 
-				|| intersect(left, line) || intersect(right, line);
 		}
 	}
 }
